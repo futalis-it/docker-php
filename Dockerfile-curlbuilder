@@ -1,0 +1,23 @@
+FROM alpine:3.18 as curl-builder
+
+RUN apk upgrade \
+    && apk add alpine-sdk
+
+RUN set -eux; \
+    adduser -D -S -G abuild abuild
+
+RUN addgroup abuild abuild \
+    && mkdir -p /var/cache/distfiles \
+    && chgrp abuild /var/cache/distfiles \
+    && chmod a+w /var/cache/distfiles
+
+WORKDIR /home/abuild
+USER abuild
+
+RUN abuild-keygen -an
+
+COPY CURL_APKBUILD /home/abuild/APKBUILD
+
+RUN abuild checksum \
+    && abuild -r
+

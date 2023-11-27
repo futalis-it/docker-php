@@ -65,6 +65,7 @@ for version; do
 
 		{
 			generated_warning
+			if [ "$version" == "8.0" -a "$suite" != "$alpineVer" ]; then cat Dockerfile-curlbuilder; fi
 			gawk -f "$jqt" 'Dockerfile-linux.template'
 		} > "$version/$dir/Dockerfile"
 
@@ -75,6 +76,9 @@ for version; do
 			"$version/$dir/"
 		if [ "$variant" = 'apache' ]; then
 			cp -a apache2-foreground "$version/$dir/"
+		fi
+		if [ "$version" == "8.0" -a "$suite" != "$alpineVer" ]; then
+		    cp -a CURL_APKBUILD "$version/$dir/"
 		fi
 
 		cmd="$(jq <<<"$cmd" -r '.[0]')"

@@ -11,7 +11,7 @@
 		)
 	;
 	def is_alpine:
-		env.from | startswith("alpine")
+		env.from | contains("alpine")
 -}}
 FROM {{ env.from }}
 
@@ -45,12 +45,14 @@ ENV PHPIZE_DEPS \
 
 # persistent / runtime deps
 {{ if is_alpine then ( -}}
-RUN apk add --no-cache \
+RUN apk upgrade --no-cache \
+    && apk add --no-cache \
 		ca-certificates \
-		curl \
-		openssl \
+		{{ if env.version != "8.0" then "curl" else "" end }} \
 		tar \
-		xz
+		xz \
+# https://github.com/docker-library/php/issues/494
+		openssl{{ if env.version == "8.0" then "1.1-compat" else "" end }}
 
 # ensure www-data user exists
 RUN set -eux; \
@@ -70,6 +72,11 @@ RUN set -eux; \
 	; \
 	rm -rf /var/lib/apt/lists/*
 {{ ) end -}}
+{{ if is_alpine and env.version == "8.0" then ( -}}
+COPY --from=curl-builder /home/abuild/packages/home/x86_64 /curl-packages
+RUN apk add --allow-untrusted /curl-packages/*.apk
+RUN ln -s /usr/bin/openssl1.1 /usr/bin/openssl
+{{ ) else "" end -}}
 
 ENV PHP_INI_DIR /usr/local/etc/php
 RUN set -eux; \
@@ -252,7 +259,8 @@ RUN set -eux; \
 			"gnu-libiconv-dev", # https://www.php.net/manual/en/intro.iconv.php "it'd be a good idea to install the GNU libiconv library"
 			"libsodium-dev",
 			"libxml2-dev",
-			"openssl-dev",
+			if env.version == "8.0" then "libzip-dev" else empty end,
+			if env.version == "8.0" then "openssl1.1-compat-dev" else "openssl-dev" end,
 			"readline-dev",
 			"sqlite-dev",
 			# https://github.com/docker-library/php/issues/888
@@ -338,6 +346,9 @@ RUN set -eux; \
 		--with-iconv{{ if is_alpine then "=/usr" else "" end }} \
 		--with-openssl \
 		--with-readline \
+{{ if (is_alpine and env.version == "8.0") then ( -}}
+        --with-zip \
+{{ ) else "" end -}}
 		--with-zlib \
 		\
 {{ if [ "cli", "zts" ] | index(env.variant) then ( -}}
