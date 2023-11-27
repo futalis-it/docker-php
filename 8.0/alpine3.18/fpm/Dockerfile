@@ -27,7 +27,7 @@ COPY CURL_APKBUILD /home/abuild/APKBUILD
 RUN abuild checksum \
     && abuild -r
 
-FROM alpine:3.18
+FROM httpd:2.4-alpine3.18
 
 # dependencies required for running "phpize"
 # these get automatically installed and removed by "docker-php-ext-*" (unless they're already installed)
@@ -52,13 +52,6 @@ RUN apk upgrade --no-cache \
 # https://github.com/docker-library/php/issues/494
 		openssl1.1-compat
 
-# ensure www-data user exists
-RUN set -eux; \
-	adduser -u 82 -D -S -G www-data www-data
-# 82 is the standard uid/gid for "www-data" in Alpine
-# https://git.alpinelinux.org/aports/tree/main/apache2/apache2.pre-install?h=3.14-stable
-# https://git.alpinelinux.org/aports/tree/main/lighttpd/lighttpd.pre-install?h=3.14-stable
-# https://git.alpinelinux.org/aports/tree/main/nginx/nginx.pre-install?h=3.14-stable
 COPY --from=curl-builder /home/abuild/packages/home/x86_64 /curl-packages
 RUN apk add --allow-untrusted /curl-packages/*.apk
 RUN ln -s /usr/bin/openssl1.1 /usr/bin/openssl

@@ -54,13 +54,6 @@ RUN apk upgrade --no-cache \
 # https://github.com/docker-library/php/issues/494
 		openssl{{ if env.version == "8.0" then "1.1-compat" else "" end }}
 
-# ensure www-data user exists
-RUN set -eux; \
-	adduser -u 82 -D -S -G www-data www-data
-# 82 is the standard uid/gid for "www-data" in Alpine
-# https://git.alpinelinux.org/aports/tree/main/apache2/apache2.pre-install?h=3.14-stable
-# https://git.alpinelinux.org/aports/tree/main/lighttpd/lighttpd.pre-install?h=3.14-stable
-# https://git.alpinelinux.org/aports/tree/main/nginx/nginx.pre-install?h=3.14-stable
 {{ ) else ( -}}
 RUN set -eux; \
 	apt-get update; \

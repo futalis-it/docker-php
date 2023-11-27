@@ -87,15 +87,12 @@ for version in "${versions[@]}"; do
 	for suite in \
 		bookworm \
 		bullseye \
-		buster \
 		alpine3.18 \
 		alpine3.17 \
 	; do
 		# 8.0 doesn't support OpenSSL 3, which is the only version in bookworm
 		# only keep two variants of Debian per version of php
 		if [ "$rcVersion" = '8.0' ] && [ "$suite" = 'bookworm' ]; then
-			continue
-		elif [ "$rcVersion" != '8.0' ] && [ "$suite" = 'buster' ]; then
 			continue
 		fi
 		for variant in cli apache fpm zts; do

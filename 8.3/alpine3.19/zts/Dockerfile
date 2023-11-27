@@ -4,11 +4,7 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
-<<<<<<<< HEAD:8.3/alpine3.19/zts/Dockerfile
-FROM alpine:3.19
-========
-FROM alpine:3.17
->>>>>>>> 667d16e0 (Made PHP 8.0 work with Alpine 3.18):8.3/alpine3.17/zts/Dockerfile
+FROM httpd:2.4-alpine3.17
 
 # dependencies required for running "phpize"
 # these get automatically installed and removed by "docker-php-ext-*" (unless they're already installed)
@@ -32,13 +28,6 @@ RUN apk upgrade --no-cache \
 		tar \
 		xz
 
-# ensure www-data user exists
-RUN set -eux; \
-	adduser -u 82 -D -S -G www-data www-data
-# 82 is the standard uid/gid for "www-data" in Alpine
-# https://git.alpinelinux.org/aports/tree/main/apache2/apache2.pre-install?h=3.14-stable
-# https://git.alpinelinux.org/aports/tree/main/lighttpd/lighttpd.pre-install?h=3.14-stable
-# https://git.alpinelinux.org/aports/tree/main/nginx/nginx.pre-install?h=3.14-stable
 
 ENV PHP_INI_DIR /usr/local/etc/php
 RUN set -eux; \

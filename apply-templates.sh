@@ -47,7 +47,7 @@ for version; do
 
 		alpineVer="${suite#alpine}" # "3.12", etc
 		if [ "$suite" != "$alpineVer" ]; then
-			from="alpine:$alpineVer"
+			from="httpd:2.4-alpine$alpineVer"
 		else
 			from="debian:$suite-slim"
 		fi
@@ -65,7 +65,7 @@ for version; do
 
 		{
 			generated_warning
-			if [ "$version" == "8.0" -a "$suite" != "$alpineVer" ]; then cat Dockerfile-curlbuilder; fi
+			if [ "$version" == "8.0" -a "$suite" != "$alpineVer" ]; then gawk -f "$jqt" 'Dockerfile-curlbuilder'; fi
 			gawk -f "$jqt" 'Dockerfile-linux.template'
 		} > "$version/$dir/Dockerfile"
 
