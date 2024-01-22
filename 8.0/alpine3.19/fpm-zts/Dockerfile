@@ -4,7 +4,7 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
-FROM alpine:3.17 as curl-builder
+FROM alpine:3.19 as curl-builder
 
 RUN apk upgrade \
     && apk add alpine-sdk
@@ -27,7 +27,7 @@ COPY CURL_APKBUILD /home/abuild/APKBUILD
 RUN abuild checksum \
     && abuild -r
 
-FROM httpd:2.4-alpine3.17
+FROM httpd:2.4-alpine3.19
 
 # dependencies required for running "phpize"
 # these get automatically installed and removed by "docker-php-ext-*" (unless they're already installed)

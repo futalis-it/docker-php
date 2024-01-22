@@ -4,30 +4,7 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
-FROM alpine:3.17 as curl-builder
-
-RUN apk upgrade \
-    && apk add alpine-sdk
-
-RUN set -eux; \
-    adduser -D -S -G abuild abuild
-
-RUN addgroup abuild abuild \
-    && mkdir -p /var/cache/distfiles \
-    && chgrp abuild /var/cache/distfiles \
-    && chmod a+w /var/cache/distfiles
-
-WORKDIR /home/abuild
-USER abuild
-
-RUN abuild-keygen -an
-
-COPY CURL_APKBUILD /home/abuild/APKBUILD
-
-RUN abuild checksum \
-    && abuild -r
-
-FROM httpd:2.4-alpine3.17
+FROM httpd:2.4-alpine3.19
 
 # dependencies required for running "phpize"
 # these get automatically installed and removed by "docker-php-ext-*" (unless they're already installed)
@@ -46,15 +23,12 @@ ENV PHPIZE_DEPS \
 RUN apk upgrade --no-cache \
     && apk add --no-cache \
 		ca-certificates \
-		 \
+		curl \
 		tar \
 		xz \
 # https://github.com/docker-library/php/issues/494
-		openssl1.1-compat
+		openssl
 
-COPY --from=curl-builder /home/abuild/packages/home/x86_64 /curl-packages
-RUN apk add --allow-untrusted /curl-packages/*.apk
-RUN ln -s /usr/bin/openssl1.1 /usr/bin/openssl
 
 ENV PHP_INI_DIR /usr/local/etc/php
 RUN set -eux; \
@@ -75,11 +49,11 @@ ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
-ENV GPG_KEYS 1729F83938DA44E27BA0F4D3DBDB397470D12172 BFDDD28642824F8118EF77909B67A5C12229118F 2C16C765DBE54A088130F1BC4B9B5F600B55F3B4 39B641343D8C104B2B146DC3F9C39DC0B9698544
+ENV GPG_KEYS 1198C0117593497A5EC5C199286AF1F9897469DC C28D937575603EB4ABB725861C0779DC5C0A9DE4 AFD8691FDAEDF03BDF6E460563F15A9B715376CA
 
-ENV PHP_VERSION 8.0.30
-ENV PHP_URL="https://www.php.net/distributions/php-8.0.30.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-8.0.30.tar.xz.asc"
-ENV PHP_SHA256="216ab305737a5d392107112d618a755dc5df42058226f1670e9db90e77d777d9"
+ENV PHP_VERSION 8.3.2
+ENV PHP_URL="https://www.php.net/distributions/php-8.3.2.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-8.3.2.tar.xz.asc"
+ENV PHP_SHA256="4ffa3e44afc9c590e28dc0d2d31fc61f0139f8b335f11880a121b9f9b9f0634e"
 
 RUN set -eux; \
 	\
@@ -118,10 +92,9 @@ RUN set -eux; \
 		gnu-libiconv-dev \
 		libsodium-dev \
 		libxml2-dev \
-		libzip-dev \
 		linux-headers \
 		oniguruma-dev \
-		openssl1.1-compat-dev \
+		openssl-dev \
 		readline-dev \
 		sqlite-dev \
 	; \
@@ -169,7 +142,6 @@ RUN set -eux; \
 		--with-iconv=/usr \
 		--with-openssl \
 		--with-readline \
-        --with-zip \
 		--with-zlib \
 		\
 # https://github.com/bwoebi/phpdbg-docs/issues/1#issuecomment-163872806 ("phpdbg is primarily a CLI debugger, and is not suitable for debugging an fpm stack.")
@@ -187,6 +159,10 @@ RUN set -eux; \
 		--enable-fpm \
 		--with-fpm-user=www-data \
 		--with-fpm-group=www-data \
+		\
+		--enable-zts \
+# https://externals.io/message/118859
+		--disable-zend-signals \
 	; \
 	make -j "$(nproc)"; \
 	find -type f -name '*.a' -delete; \

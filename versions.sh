@@ -87,8 +87,8 @@ for version in "${versions[@]}"; do
 	for suite in \
 		bookworm \
 		bullseye \
+		alpine3.19 \
 		alpine3.18 \
-		alpine3.17 \
 	; do
 		# 8.0 doesn't support OpenSSL 3, which is the only version in bookworm
 		# only keep two variants of Debian per version of php
