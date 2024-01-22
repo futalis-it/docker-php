@@ -378,12 +378,13 @@ RUN set -eux; \
 {{ if env.variant == "apache" then ( -}}
 		\
 		--with-apxs2 \
-{{ ) elif env.variant == "fpm" then ( -}}
+{{ ) elif env.variant | contains("fpm") then ( -}}
 		\
 		--enable-fpm \
 		--with-fpm-user=www-data \
 		--with-fpm-group=www-data \
-{{ ) elif env.variant == "zts" then ( -}}
+{{ ) else "" end -}}
+{{ if env.variant | contains("zts") then ( -}}
 		\
 		--enable-zts \
 # https://externals.io/message/118859
@@ -467,7 +468,7 @@ COPY apache2-foreground /usr/local/bin/
 WORKDIR /var/www/html
 
 EXPOSE 80
-{{ ) elif env.variant == "fpm" then ( -}}
+{{ ) elif env.variant | contains("fpm") then ( -}}
 WORKDIR /var/www/html
 
 RUN set -eux; \

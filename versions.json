@@ -1,4 +1,26 @@
 {
+  "8.0": {
+    "ascUrl": "https://www.php.net/distributions/php-8.0.30.tar.xz.asc",
+    "sha256": "216ab305737a5d392107112d618a755dc5df42058226f1670e9db90e77d777d9",
+    "url": "https://www.php.net/distributions/php-8.0.30.tar.xz",
+    "variants": [
+      "bullseye/cli",
+      "bullseye/apache",
+      "bullseye/fpm",
+      "bullseye/zts",
+      "bullseye/fpm-zts",
+      "alpine3.18/cli",
+      "alpine3.18/fpm",
+      "alpine3.18/zts",
+      "alpine3.18/fpm-zts",
+      "alpine3.17/cli",
+      "alpine3.17/fpm",
+      "alpine3.17/zts",
+      "alpine3.17/fpm-zts"
+    ],
+    "version": "8.0.30"
+  },
+  "8.0-rc": null,
   "8.1": {
     "ascUrl": "https://www.php.net/distributions/php-8.1.27.tar.xz.asc",
     "sha256": "479e65c3f05714d4aace1370e617d78e49e996ec7a7579a5be47535be61f0658",
@@ -8,16 +30,20 @@
       "bookworm/apache",
       "bookworm/fpm",
       "bookworm/zts",
+      "bookworm/fpm-zts",
       "bullseye/cli",
       "bullseye/apache",
       "bullseye/fpm",
       "bullseye/zts",
+      "bullseye/fpm-zts",
       "alpine3.18/cli",
       "alpine3.18/fpm",
       "alpine3.18/zts",
+      "alpine3.18/fpm-zts",
       "alpine3.17/cli",
       "alpine3.17/fpm",
-      "alpine3.17/zts"
+      "alpine3.17/zts",
+      "alpine3.17/fpm-zts"
     ],
     "version": "8.1.27"
   },
@@ -31,19 +57,20 @@
       "bookworm/apache",
       "bookworm/fpm",
       "bookworm/zts",
+      "bookworm/fpm-zts",
       "bullseye/cli",
       "bullseye/apache",
       "bullseye/fpm",
       "bullseye/zts",
-      "alpine3.19/cli",
-      "alpine3.19/fpm",
-      "alpine3.19/zts",
+      "bullseye/fpm-zts",
       "alpine3.18/cli",
       "alpine3.18/fpm",
       "alpine3.18/zts",
+      "alpine3.18/fpm-zts",
       "alpine3.17/cli",
       "alpine3.17/fpm",
-      "alpine3.17/zts"
+      "alpine3.17/zts",
+      "alpine3.17/fpm-zts"
     ],
     "version": "8.2.15"
   },
@@ -57,16 +84,20 @@
       "bookworm/apache",
       "bookworm/fpm",
       "bookworm/zts",
+      "bookworm/fpm-zts",
       "bullseye/cli",
       "bullseye/apache",
       "bullseye/fpm",
       "bullseye/zts",
-      "alpine3.19/cli",
-      "alpine3.19/fpm",
-      "alpine3.19/zts",
+      "bullseye/fpm-zts",
       "alpine3.18/cli",
       "alpine3.18/fpm",
-      "alpine3.18/zts"
+      "alpine3.18/zts",
+      "alpine3.18/fpm-zts",
+      "alpine3.17/cli",
+      "alpine3.17/fpm",
+      "alpine3.17/zts",
+      "alpine3.17/fpm-zts"
     ],
     "version": "8.3.2"
   },

@@ -50,15 +50,9 @@ ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
 ENV GPG_KEYS 1198C0117593497A5EC5C199286AF1F9897469DC C28D937575603EB4ABB725861C0779DC5C0A9DE4 AFD8691FDAEDF03BDF6E460563F15A9B715376CA
 
-<<<<<<<< HEAD:8.1/alpine3.19/fpm/Dockerfile
-ENV PHP_VERSION 8.1.27
-ENV PHP_URL="https://www.php.net/distributions/php-8.1.27.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-8.1.27.tar.xz.asc"
-ENV PHP_SHA256="479e65c3f05714d4aace1370e617d78e49e996ec7a7579a5be47535be61f0658"
-========
 ENV PHP_VERSION 8.3.0
 ENV PHP_URL="https://www.php.net/distributions/php-8.3.0.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-8.3.0.tar.xz.asc"
 ENV PHP_SHA256="1db84fec57125aa93638b51bb2b15103e12ac196e2f960f0d124275b2687ea54"
->>>>>>>> 667d16e0 (Made PHP 8.0 work with Alpine 3.18):8.3/alpine3.17/fpm/Dockerfile
 
 RUN set -eux; \
 	\

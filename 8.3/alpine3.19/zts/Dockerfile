@@ -50,15 +50,9 @@ ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
 ENV GPG_KEYS 1198C0117593497A5EC5C199286AF1F9897469DC C28D937575603EB4ABB725861C0779DC5C0A9DE4 AFD8691FDAEDF03BDF6E460563F15A9B715376CA
 
-<<<<<<<< HEAD:8.3/alpine3.19/zts/Dockerfile
-ENV PHP_VERSION 8.3.2
-ENV PHP_URL="https://www.php.net/distributions/php-8.3.2.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-8.3.2.tar.xz.asc"
-ENV PHP_SHA256="4ffa3e44afc9c590e28dc0d2d31fc61f0139f8b335f11880a121b9f9b9f0634e"
-========
-ENV PHP_VERSION 8.3.0
-ENV PHP_URL="https://www.php.net/distributions/php-8.3.0.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-8.3.0.tar.xz.asc"
-ENV PHP_SHA256="1db84fec57125aa93638b51bb2b15103e12ac196e2f960f0d124275b2687ea54"
->>>>>>>> 667d16e0 (Made PHP 8.0 work with Alpine 3.18):8.3/alpine3.17/zts/Dockerfile
+ENV PHP_VERSION 8.2.15
+ENV PHP_URL="https://www.php.net/distributions/php-8.2.15.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-8.2.15.tar.xz.asc"
+ENV PHP_SHA256="eca5deac02d77d806838275f8a3024b38b35ac0a5d9853dcc71c6cbe3f1f8765"
 
 RUN set -eux; \
 	\
