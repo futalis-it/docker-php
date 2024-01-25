@@ -24,10 +24,10 @@ RUN apk upgrade --no-cache \
     && apk add --no-cache \
 		ca-certificates \
 		curl \
+# https://github.com/docker-library/php/issues/494
 		openssl \
 		tar \
 		xz
-
 
 ENV PHP_INI_DIR /usr/local/etc/php
 RUN set -eux; \
@@ -50,9 +50,9 @@ ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
 ENV GPG_KEYS 1198C0117593497A5EC5C199286AF1F9897469DC C28D937575603EB4ABB725861C0779DC5C0A9DE4 AFD8691FDAEDF03BDF6E460563F15A9B715376CA
 
-ENV PHP_VERSION 8.2.15
-ENV PHP_URL="https://www.php.net/distributions/php-8.2.15.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-8.2.15.tar.xz.asc"
-ENV PHP_SHA256="eca5deac02d77d806838275f8a3024b38b35ac0a5d9853dcc71c6cbe3f1f8765"
+ENV PHP_VERSION 8.3.2
+ENV PHP_URL="https://www.php.net/distributions/php-8.3.2.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-8.3.2.tar.xz.asc"
+ENV PHP_SHA256="4ffa3e44afc9c590e28dc0d2d31fc61f0139f8b335f11880a121b9f9b9f0634e"
 
 RUN set -eux; \
 	\
