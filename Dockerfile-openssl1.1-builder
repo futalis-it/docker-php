@@ -1,0 +1,23 @@
+FROM alpine:{{ env.alpineVer }} as openssl1-builder
+
+RUN apk upgrade \
+    && apk add alpine-sdk
+
+RUN set -eux; \
+    adduser -D -S -G abuild abuild
+
+RUN addgroup abuild abuild \
+    && mkdir -p /var/cache/distfiles \
+    && chgrp abuild /var/cache/distfiles \
+    && chmod a+w /var/cache/distfiles
+
+WORKDIR /home/abuild
+USER abuild
+
+RUN abuild-keygen -an
+
+COPY openssl1.1-compat/ /home/abuild/
+
+RUN abuild checksum \
+    && abuild -r
+

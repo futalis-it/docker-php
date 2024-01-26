@@ -1,7 +1,17 @@
+{{
+	def is_alpine319:
+	    env.from | contains("alpine3.19")
+-}}
 FROM alpine:{{ env.alpineVer }} as curl-builder
 
 RUN apk upgrade \
     && apk add alpine-sdk
+
+{{ if is_alpine319 and env.version == "8.0" then ( -}}
+COPY --from=openssl1-builder /home/abuild/packages/home/x86_64 /openssl1-packages
+RUN apk add --allow-untrusted /openssl1-packages/*.apk
+#RUN ln -s /usr/bin/openssl1.1 /usr/bin/openssl
+{{ ) else "" end -}}
 
 RUN set -eux; \
     adduser -D -S -G abuild abuild

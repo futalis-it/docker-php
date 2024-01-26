@@ -12,6 +12,9 @@
 	;
 	def is_alpine:
 		env.from | contains("alpine")
+    ;
+	def is_alpine319:
+	    env.from | contains("alpine3.19")
 -}}
 FROM {{ env.from }}
 
@@ -49,8 +52,7 @@ RUN apk upgrade --no-cache \
     && apk add --no-cache \
 		ca-certificates \
 		{{ if env.version != "8.0" then "curl" else "" end }} \
-# https://github.com/docker-library/php/issues/494
-		openssl{{ if env.version == "8.0" then "1.1-compat" else "" end }} \
+		{{ if env.version == "8.0" then (if is_alpine319 then "" else "openssl1.1-compat" end) else "openssl" end }} \
 		tar \
 		xz
 {{ ) else ( -}}
@@ -64,6 +66,13 @@ RUN set -eux; \
 	; \
 	rm -rf /var/lib/apt/lists/*
 {{ ) end -}}
+
+{{ if is_alpine319 and env.version == "8.0" then ( -}}
+COPY --from=openssl1-builder /home/abuild/packages/home/x86_64 /openssl1-packages
+RUN apk add --allow-untrusted /openssl1-packages/*.apk
+#RUN ln -s /usr/bin/openssl1.1 /usr/bin/openssl
+{{ ) else "" end -}}
+
 {{ if is_alpine and env.version == "8.0" then ( -}}
 COPY --from=curl-builder /home/abuild/packages/home/x86_64 /curl-packages
 RUN apk add --allow-untrusted /curl-packages/*.apk
