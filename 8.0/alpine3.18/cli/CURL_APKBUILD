@@ -8,7 +8,7 @@
 # this aport from arch=all WILL be reverted.
 
 pkgname=curl
-pkgver=8.4.0
+pkgver=8.5.0
 pkgrel=1
 pkgdesc="URL retrival utility and library"
 url="https://curl.se/"

@@ -24,10 +24,11 @@ RUN apk upgrade --no-cache \
     && apk add --no-cache \
 		ca-certificates \
 		curl \
-# https://github.com/docker-library/php/issues/494
 		openssl \
 		tar \
 		xz
+
+
 
 ENV PHP_INI_DIR /usr/local/etc/php
 RUN set -eux; \
