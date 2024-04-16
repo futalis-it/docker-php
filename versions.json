@@ -22,9 +22,9 @@
   },
   "8.0-rc": null,
   "8.1": {
-    "ascUrl": "https://www.php.net/distributions/php-8.1.27.tar.xz.asc",
-    "sha256": "479e65c3f05714d4aace1370e617d78e49e996ec7a7579a5be47535be61f0658",
-    "url": "https://www.php.net/distributions/php-8.1.27.tar.xz",
+    "ascUrl": "https://www.php.net/distributions/php-8.1.28.tar.xz.asc",
+    "sha256": "95d0b2e9466108fd750dab5c30a09e5c67f5ad2cb3b1ffb3625a038a755ad080",
+    "url": "https://www.php.net/distributions/php-8.1.28.tar.xz",
     "variants": [
       "bookworm/cli",
       "bookworm/apache",
@@ -45,13 +45,13 @@
       "alpine3.18/zts",
       "alpine3.18/fpm-zts"
     ],
-    "version": "8.1.27"
+    "version": "8.1.28"
   },
   "8.1-rc": null,
   "8.2": {
-    "ascUrl": "https://www.php.net/distributions/php-8.2.16.tar.xz.asc",
-    "sha256": "28cdc995b7d5421711c7044294885fcde4390c9f67504a994b4cf9bc1b5cc593",
-    "url": "https://www.php.net/distributions/php-8.2.16.tar.xz",
+    "ascUrl": "https://www.php.net/distributions/php-8.2.18.tar.xz.asc",
+    "sha256": "44b306fc021e56441f691da6c3108788bd9e450f293b3bc70fcd64b08dd41a50",
+    "url": "https://www.php.net/distributions/php-8.2.18.tar.xz",
     "variants": [
       "bookworm/cli",
       "bookworm/apache",
@@ -72,13 +72,13 @@
       "alpine3.18/zts",
       "alpine3.18/fpm-zts"
     ],
-    "version": "8.2.16"
+    "version": "8.2.18"
   },
   "8.2-rc": null,
   "8.3": {
-    "ascUrl": "https://www.php.net/distributions/php-8.3.3.tar.xz.asc",
-    "sha256": "b0a996276fe21fe9ca8f993314c8bc02750f464c7b0343f056fb0894a8dfa9d1",
-    "url": "https://www.php.net/distributions/php-8.3.3.tar.xz",
+    "ascUrl": "https://www.php.net/distributions/php-8.3.6.tar.xz.asc",
+    "sha256": "53c8386b2123af97626d3438b3e4058e0c5914cb74b048a6676c57ac647f5eae",
+    "url": "https://www.php.net/distributions/php-8.3.6.tar.xz",
     "variants": [
       "bookworm/cli",
       "bookworm/apache",
@@ -99,7 +99,7 @@
       "alpine3.18/zts",
       "alpine3.18/fpm-zts"
     ],
-    "version": "8.3.3"
+    "version": "8.3.6"
   },
   "8.3-rc": null
 }
