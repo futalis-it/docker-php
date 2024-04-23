@@ -19,7 +19,8 @@ RUN abuild-keygen -an \
 
 COPY openssl1.1-compat/ /root/
 
-RUN abuild -Fr
+RUN abuild -F checksum \
+    && abuild -Fr
 
 FROM alpine:3.19 as curl-builder
 
@@ -67,7 +68,7 @@ RUN apk upgrade --no-cache \
 		tar \
 		xz
 
-COPY --from=openssl1-builder /home/abuild/packages/home/x86_64 /openssl1-packages
+COPY --from=openssl1-builder /root/packages/home/x86_64 /openssl1-packages
 COPY --from=openssl1-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
 RUN apk add --allow-untrusted /openssl1-packages/*.apk
 #RUN ln -s /usr/bin/openssl1.1 /usr/bin/openssl

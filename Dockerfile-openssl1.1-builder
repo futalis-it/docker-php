@@ -13,5 +13,6 @@ RUN abuild-keygen -an \
 
 COPY openssl1.1-compat/ /root/
 
-RUN abuild -Fr
+RUN abuild -F checksum \
+    && abuild -Fr
 
