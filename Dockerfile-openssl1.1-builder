@@ -3,21 +3,15 @@ FROM alpine:{{ env.alpineVer }} as openssl1-builder
 RUN apk upgrade \
     && apk add alpine-sdk
 
-RUN set -eux; \
-    adduser -D -S -G abuild abuild
-
-RUN addgroup abuild abuild \
-    && mkdir -p /var/cache/distfiles \
-    && chgrp abuild /var/cache/distfiles \
+RUN mkdir -p /var/cache/distfiles \
     && chmod a+w /var/cache/distfiles
 
-WORKDIR /home/abuild
-USER abuild
+WORKDIR /root
 
-RUN abuild-keygen -an
+RUN abuild-keygen -an \
+    && cp /root/.abuild/-*.rsa.pub /etc/apk/keys/
 
-COPY openssl1.1-compat/ /home/abuild/
+COPY openssl1.1-compat/ /root/
 
-RUN abuild checksum \
-    && abuild -r
+RUN abuild -Fr
 

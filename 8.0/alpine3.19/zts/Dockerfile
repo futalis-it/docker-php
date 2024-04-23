@@ -9,30 +9,24 @@ FROM alpine:3.19 as openssl1-builder
 RUN apk upgrade \
     && apk add alpine-sdk
 
-RUN set -eux; \
-    adduser -D -S -G abuild abuild
-
-RUN addgroup abuild abuild \
-    && mkdir -p /var/cache/distfiles \
-    && chgrp abuild /var/cache/distfiles \
+RUN mkdir -p /var/cache/distfiles \
     && chmod a+w /var/cache/distfiles
 
-WORKDIR /home/abuild
-USER abuild
+WORKDIR /root
 
-RUN abuild-keygen -an
+RUN abuild-keygen -an \
+    && cp /root/.abuild/-*.rsa.pub /etc/apk/keys/
 
-COPY openssl1.1-compat/ /home/abuild/
+COPY openssl1.1-compat/ /root/
 
-RUN abuild checksum \
-    && abuild -r
+RUN abuild -Fr
 
 FROM alpine:3.19 as curl-builder
 
 RUN apk upgrade \
     && apk add alpine-sdk
 
-COPY --from=openssl1-builder /home/abuild/packages/home/x86_64 /openssl1-packages
+COPY --from=openssl1-builder /root/packages/home/x86_64 /openssl1-packages
 RUN apk add --allow-untrusted /openssl1-packages/*.apk
 #RUN ln -s /usr/bin/openssl1.1 /usr/bin/openssl
 
@@ -45,14 +39,14 @@ RUN addgroup abuild abuild \
     && chmod a+w /var/cache/distfiles
 
 WORKDIR /home/abuild
-USER abuild
+#USER abuild
 
-RUN abuild-keygen -an
+RUN abuild-keygen -an \
+    && cp /root/.abuild/-*.rsa.pub /etc/apk/keys/
 
 COPY CURL_APKBUILD /home/abuild/APKBUILD
 
-RUN abuild checksum \
-    && abuild -r
+RUN abuild -Fr
 
 FROM httpd:2.4-alpine3.19
 
@@ -82,8 +76,9 @@ COPY --from=openssl1-builder /home/abuild/packages/home/x86_64 /openssl1-package
 RUN apk add --allow-untrusted /openssl1-packages/*.apk
 #RUN ln -s /usr/bin/openssl1.1 /usr/bin/openssl
 
-COPY --from=curl-builder /home/abuild/packages/home/x86_64 /curl-packages
-RUN apk add --allow-untrusted /curl-packages/*.apk
+COPY --from=curl-builder /root/packages/home/x86_64 /curl-packages
+COPY --from=curl-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
+RUN apk add /curl-packages/*.apk
 RUN ln -s /usr/bin/openssl1.1 /usr/bin/openssl
 
 ENV PHP_INI_DIR /usr/local/etc/php
