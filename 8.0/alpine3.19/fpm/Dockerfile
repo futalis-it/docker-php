@@ -27,24 +27,19 @@ RUN apk upgrade \
     && apk add alpine-sdk
 
 COPY --from=openssl1-builder /root/packages/home/x86_64 /openssl1-packages
-RUN apk add --allow-untrusted /openssl1-packages/*.apk
+COPY --from=openssl1-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
+RUN apk add /openssl1-packages/*.apk
 #RUN ln -s /usr/bin/openssl1.1 /usr/bin/openssl
 
-RUN set -eux; \
-    adduser -D -S -G abuild abuild
-
-RUN addgroup abuild abuild \
-    && mkdir -p /var/cache/distfiles \
-    && chgrp abuild /var/cache/distfiles \
+RUN mkdir -p /var/cache/distfiles \
     && chmod a+w /var/cache/distfiles
 
-WORKDIR /home/abuild
-#USER abuild
+WORKDIR /root
 
 RUN abuild-keygen -an \
     && cp /root/.abuild/-*.rsa.pub /etc/apk/keys/
 
-COPY CURL_APKBUILD /home/abuild/APKBUILD
+COPY CURL_APKBUILD /root/APKBUILD
 
 RUN abuild -Fr
 
@@ -73,6 +68,7 @@ RUN apk upgrade --no-cache \
 		xz
 
 COPY --from=openssl1-builder /home/abuild/packages/home/x86_64 /openssl1-packages
+COPY --from=openssl1-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
 RUN apk add --allow-untrusted /openssl1-packages/*.apk
 #RUN ln -s /usr/bin/openssl1.1 /usr/bin/openssl
 

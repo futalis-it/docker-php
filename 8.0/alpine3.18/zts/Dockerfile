@@ -10,21 +10,15 @@ RUN apk upgrade \
     && apk add alpine-sdk
 
 
-RUN set -eux; \
-    adduser -D -S -G abuild abuild
-
-RUN addgroup abuild abuild \
-    && mkdir -p /var/cache/distfiles \
-    && chgrp abuild /var/cache/distfiles \
+RUN mkdir -p /var/cache/distfiles \
     && chmod a+w /var/cache/distfiles
 
-WORKDIR /home/abuild
-#USER abuild
+WORKDIR /root
 
 RUN abuild-keygen -an \
     && cp /root/.abuild/-*.rsa.pub /etc/apk/keys/
 
-COPY CURL_APKBUILD /home/abuild/APKBUILD
+COPY CURL_APKBUILD /root/APKBUILD
 
 RUN abuild -Fr
 
