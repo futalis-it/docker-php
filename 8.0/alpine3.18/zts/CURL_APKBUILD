@@ -16,25 +16,29 @@ arch="all"
 license="curl"
 depends="ca-certificates"
 depends_dev="
-    brotli-dev
+	brotli-dev
 	c-ares-dev
 	libidn2-dev
-    nghttp2-dev
-    openssl1.1-compat-dev
-    zlib-dev
-    "
+	libpsl-dev
+	nghttp2-dev
+	openssl1.1-compat-dev
+	zlib-dev
+	"
 checkdepends="nghttp2 python3"
 makedepends_host="$depends_dev"
-makedepends_build="autoconf automake groff libtool perl"
+makedepends_build="groff perl"
 subpackages="$pkgname-dbg $pkgname-static $pkgname-doc $pkgname-dev libcurl"
-[ -z "$BOOTSTRAP" ] && subpackages="$subpackages $pkgname-zsh-completion $pkgname-fish-completion"
 source="
 	https://curl.se/download/curl-$pkgver.tar.xz
+	$pkgname-$pkgver-errorcodes.pl::https://github.com/curl/curl/raw/curl-${pkgver//./_}/tests/errorcodes.pl
 	"
 options="net" # Required for running tests
 [ -n "$BOOTSTRAP" ] && options="$options !check" # remove python3 dependency
 
 # secfixes:
+#   8.5.0-r0:
+#     - CVE-2023-46218
+#     - CVE-2023-46219
 #   8.4.0-r0:
 #     - CVE-2023-38545
 #     - CVE-2023-38546
@@ -45,27 +49,28 @@ options="net" # Required for running tests
 #     - CVE-2023-28320
 #     - CVE-2023-28321
 #     - CVE-2023-28322
-#   8.0.1-r0:
+#   8.0.0-r0:
 #     - CVE-2023-27533
 #     - CVE-2023-27534
 #     - CVE-2023-27535
 #     - CVE-2023-27536
 #     - CVE-2023-27537
 #     - CVE-2023-27538
-#   7.83.1-r6:
+#   7.88.0-r0:
 #     - CVE-2023-23914
 #     - CVE-2023-23915
 #     - CVE-2023-23916
-#   7.83.1-r5:
+#   7.87.0-r0:
 #     - CVE-2022-43551
 #     - CVE-2022-43552
-#   7.83.1-r4:
+#   7.86.0-r0:
 #     - CVE-2022-32221
+#     - CVE-2022-35260
 #     - CVE-2022-42915
 #     - CVE-2022-42916
-#   7.83.1-r3:
+#   7.85.0-r0:
 #     - CVE-2022-35252
-#   7.83.1-r2:
+#   7.84.0-r0:
 #     - CVE-2022-32205
 #     - CVE-2022-32206
 #     - CVE-2022-32207
@@ -177,7 +182,9 @@ options="net" # Required for running tests
 
 prepare() {
 	default_prepare
-	autoreconf -vfi
+
+	install -Dvm755 ../$pkgname-$pkgver-errorcodes.pl \
+		tests/errorcodes.pl
 }
 
 build() {
@@ -185,49 +192,39 @@ build() {
 		--build=$CBUILD \
 		--host=$CHOST \
 		--prefix=/usr \
+		--enable-ares \
 		--enable-ipv6 \
 		--enable-unix-sockets \
 		--enable-static \
-		--with-openssl \
-		--without-libidn2 \
+		--with-libidn2 \
 		--with-nghttp2 \
+		--with-openssl \
 		--disable-ldap \
 		--with-pic \
+		--enable-websockets \
 		--without-libssh2 # https://bugs.alpinelinux.org/issues/10222
 	make -j8
-
-	# generation of completions is not supported when cross-compiling.
-	[ -z "$BOOTSTRAP" ] && make -C scripts/
 }
 
 check() {
-	echo make -C tests nonflaky-test
+	make -C tests
+	make -j1 -C tests TFLAGS="-j$JOBS" nonflaky-test
 }
 
 package() {
+	# depends on exactly the same build of libcurl
+	depends="libcurl=$pkgver-r$pkgrel"
+
 	make install DESTDIR="$pkgdir"
-	if [ -z "$BOOTSTRAP" ]; then
-		install -Dm644 scripts/_curl -t \
-			"$pkgdir"/usr/share/zsh/site-functions/
-		install -Dm644 scripts/curl.fish -t \
-			"$pkgdir"/usr/share/fish/completions/
-	fi
 }
 
 libcurl() {
 	pkgdesc="The multiprotocol file transfer library"
 
-	mkdir -p "$subpkgdir"/usr
-	mv "$pkgdir"/usr/lib "$subpkgdir"/usr
-}
-
-static() {
-	pkgdesc="$pkgdesc (static library)"
-
-	mkdir -p "$subpkgdir"/usr/lib
-	mv "$pkgdir"/usr/lib/*.a "$subpkgdir"/usr/lib
+	amove usr/lib
 }
 
 sha512sums="
-7027dbf3b759b39d6ec9c4da58fadd254e84bb93bff599541b3bc3135bad4c2955c6237d7ddd60973f9f1a6948bc32d7e312985fb50658bc958b9f22fee74f2b  curl-8.4.0.tar.xz
+acffa2cf61d9b8e4188575a1b40227da8d722df2e5fe8bb82a222b4eb2fd64bf8aebd90852ce050c79fb5e517d5cee2546bf7de92ede1dd394263e231cb741a3  curl-8.5.0.tar.xz
+7848b1271e0bfe3be40221fb0582712d4af3ce1e1bdf16b5f0cac731d81bda145efc039f945a311af70caff279a44435a8ead6bb6e1db7570a4bd22df0a77fdb  curl-8.5.0-errorcodes.pl
 "
