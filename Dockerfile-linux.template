@@ -14,7 +14,7 @@
 		env.from | contains("alpine")
     ;
 	def is_alpine319:
-	    env.from | contains("alpine3.19")
+	    env.alpineVer | contains("3.19")
 -}}
 FROM {{ env.from }}
 
@@ -55,6 +55,8 @@ RUN apk upgrade --no-cache \
 		{{ if env.version == "8.0" then (if is_alpine319 then "" else "openssl1.1-compat" end) else "openssl" end }} \
 		tar \
 		xz
+{{ if env.variant == "cli" then "RUN adduser -u 82 -D -S -G www-data www-data" else "" end }}
+
 {{ ) else ( -}}
 RUN set -eux; \
 	apt-get update; \

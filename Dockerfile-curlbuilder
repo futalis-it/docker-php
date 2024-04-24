@@ -1,6 +1,6 @@
 {{
 	def is_alpine319:
-	    env.from | contains("alpine3.19")
+	    env.alpineVer | contains("3.19")
 -}}
 FROM alpine:{{ env.alpineVer }} as curl-builder
 

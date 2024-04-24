@@ -22,7 +22,7 @@ COPY CURL_APKBUILD /root/APKBUILD
 
 RUN abuild -Fr
 
-FROM httpd:2.4-alpine3.18
+FROM alpine:3.18
 
 # dependencies required for running "phpize"
 # these get automatically installed and removed by "docker-php-ext-*" (unless they're already installed)
@@ -45,6 +45,8 @@ RUN apk upgrade --no-cache \
 		openssl1.1-compat \
 		tar \
 		xz
+RUN adduser -u 82 -D -S -G www-data www-data
+
 
 
 COPY --from=curl-builder /root/packages/x86_64 /curl-packages

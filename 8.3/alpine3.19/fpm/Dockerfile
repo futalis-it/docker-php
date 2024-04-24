@@ -30,6 +30,8 @@ RUN apk upgrade --no-cache \
 
 
 
+
+
 ENV PHP_INI_DIR /usr/local/etc/php
 RUN set -eux; \
 	mkdir -p "$PHP_INI_DIR/conf.d"; \
