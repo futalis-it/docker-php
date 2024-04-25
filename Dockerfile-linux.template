@@ -51,7 +51,6 @@ ENV PHPIZE_DEPS \
 RUN apk upgrade --no-cache \
     && apk add --no-cache \
 		ca-certificates \
-		{{ if env.version != "8.0" then "curl" else "" end }} \
 		{{ if env.version == "8.0" then (if is_alpine319 then "" else "openssl1.1-compat" end) else "openssl" end }} \
 		tar \
 		xz
@@ -76,11 +75,11 @@ RUN apk add --allow-untrusted /openssl1-packages/*.apk
 #RUN ln -s /usr/bin/openssl1.1 /usr/bin/openssl
 {{ ) else "" end -}}
 
-{{ if is_alpine and env.version == "8.0" then ( -}}
+{{ if is_alpine then ( -}}
 COPY --from=curl-builder /root/packages/x86_64 /curl-packages
 COPY --from=curl-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
 RUN apk add /curl-packages/*.apk
-RUN ln -s /usr/bin/openssl1.1 /usr/bin/openssl
+{{ if env.version == "8.0" then "RUN ln -s /usr/bin/openssl1.1 /usr/bin/openssl" else "" end }}
 {{ ) else "" end -}}
 
 ENV PHP_INI_DIR /usr/local/etc/php

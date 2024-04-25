@@ -64,7 +64,6 @@ RUN apk upgrade --no-cache \
     && apk add --no-cache \
 		ca-certificates \
 		 \
-		 \
 		tar \
 		xz
 RUN adduser -u 82 -D -S -G www-data www-data

@@ -4,6 +4,24 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
+FROM alpine:3.18 as curl-builder
+
+RUN apk upgrade \
+    && apk add alpine-sdk
+
+
+RUN mkdir -p /var/cache/distfiles \
+    && chmod a+w /var/cache/distfiles
+
+WORKDIR /root
+
+RUN abuild-keygen -an \
+    && cp /root/.abuild/-*.rsa.pub /etc/apk/keys/
+
+COPY CURL_APKBUILD /root/APKBUILD
+
+RUN abuild -Fr
+
 FROM alpine:3.18
 
 # dependencies required for running "phpize"
@@ -23,13 +41,16 @@ ENV PHPIZE_DEPS \
 RUN apk upgrade --no-cache \
     && apk add --no-cache \
 		ca-certificates \
-		curl \
 		openssl \
 		tar \
 		xz
-
 RUN adduser -u 82 -D -S -G www-data www-data
 
+
+
+COPY --from=curl-builder /root/packages/x86_64 /curl-packages
+COPY --from=curl-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
+RUN apk add /curl-packages/*.apk
 
 
 ENV PHP_INI_DIR /usr/local/etc/php

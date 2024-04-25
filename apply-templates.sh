@@ -69,7 +69,7 @@ for version; do
 		{
 			generated_warning
 			if [ "$version" == "8.0" -a "$suite" == "alpine3.19" ]; then gawk -f "$jqt" 'Dockerfile-openssl1.1-builder'; fi
-			if [ "$version" == "8.0" -a "$suite" != "$alpineVer" ]; then gawk -f "$jqt" 'Dockerfile-curlbuilder'; fi
+			if [ "$suite" != "$alpineVer" ]; then gawk -f "$jqt" 'Dockerfile-curlbuilder'; fi
 			gawk -f "$jqt" 'Dockerfile-linux.template'
 		} > "$version/$dir/Dockerfile"
 
@@ -81,8 +81,11 @@ for version; do
 		if [ "$variant" = 'apache' ]; then
 			cp -a apache2-foreground "$version/$dir/"
 		fi
-		if [ "$version" == "8.0" -a "$suite" != "$alpineVer" ]; then
+		if [ "$suite" != "$alpineVer" ]; then
 		    cp -a CURL_APKBUILD "$version/$dir/"
+		    if [ "$version" == "8.0" ]; then
+		        sed -i 's/openssl-dev>3/openssl1.1-compat-dev/g' "$version/$dir/CURL_APKBUILD"
+		    fi
 		fi
 		if [ "$version" == "8.0" -a "$suite" == "alpine3.19" ]; then
 		    cp -ar openssl1.1-compat "$version/$dir/"

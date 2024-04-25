@@ -41,7 +41,6 @@ ENV PHPIZE_DEPS \
 RUN apk upgrade --no-cache \
     && apk add --no-cache \
 		ca-certificates \
-		 \
 		openssl1.1-compat \
 		tar \
 		xz

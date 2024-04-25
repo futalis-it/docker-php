@@ -64,7 +64,6 @@ RUN apk upgrade --no-cache \
     && apk add --no-cache \
 		ca-certificates \
 		 \
-		 \
 		tar \
 		xz
 
