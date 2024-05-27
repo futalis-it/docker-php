@@ -68,8 +68,12 @@ for version; do
 
 		{
 			generated_warning
-			if [ "$version" == "8.0" -a "$suite" == "alpine3.19" ]; then gawk -f "$jqt" 'Dockerfile-openssl1.1-builder'; fi
-			if [ "$suite" != "$alpineVer" ]; then gawk -f "$jqt" 'Dockerfile-curlbuilder'; fi
+			if [ "$suite" != "$alpineVer" ]; then
+			    if [ "$version" == "8.0" ]; then
+			        gawk -f "$jqt" 'Dockerfile-openssl1.1-builder';
+                fi
+			    gawk -f "$jqt" 'Dockerfile-curlbuilder';
+            fi
 			gawk -f "$jqt" 'Dockerfile-linux.template'
 		} > "$version/$dir/Dockerfile"
 

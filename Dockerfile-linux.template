@@ -12,9 +12,6 @@
 	;
 	def is_alpine:
 		env.from | contains("alpine")
-    ;
-	def is_alpine319:
-	    env.alpineVer | contains("3.19")
 -}}
 FROM {{ env.from }}
 

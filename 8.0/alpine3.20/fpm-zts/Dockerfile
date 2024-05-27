@@ -4,6 +4,24 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
+FROM alpine:3.20 as openssl1-builder
+
+RUN apk upgrade \
+    && apk add alpine-sdk
+
+RUN mkdir -p /var/cache/distfiles \
+    && chmod a+w /var/cache/distfiles
+
+WORKDIR /root
+
+RUN abuild-keygen -an \
+    && cp /root/.abuild/-*.rsa.pub /etc/apk/keys/
+
+COPY openssl1.1-compat/ /root/
+
+RUN abuild -F checksum \
+    && abuild -Fr
+
 FROM alpine:3.20 as curl-builder
 
 RUN apk upgrade \

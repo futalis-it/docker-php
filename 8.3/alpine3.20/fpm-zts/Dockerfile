@@ -47,11 +47,9 @@ RUN apk upgrade --no-cache \
 
 
 
-
 COPY --from=curl-builder /root/packages/x86_64 /curl-packages
 COPY --from=curl-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
 RUN apk add /curl-packages/*.apk
-
 
 ENV PHP_INI_DIR /usr/local/etc/php
 RUN set -eux; \
