@@ -72,12 +72,10 @@ RUN apk upgrade --no-cache \
 COPY --from=openssl1-builder /root/packages/x86_64 /openssl1-packages
 COPY --from=openssl1-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
 RUN apk add --allow-untrusted /openssl1-packages/*.apk
-#RUN ln -s /usr/bin/openssl1.1 /usr/bin/openssl
-
+RUN ln -s /usr/bin/openssl1.1 /usr/bin/openssl
 COPY --from=curl-builder /root/packages/x86_64 /curl-packages
 COPY --from=curl-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
 RUN apk add /curl-packages/*.apk
-RUN ln -s /usr/bin/openssl1.1 /usr/bin/openssl
 
 ENV PHP_INI_DIR /usr/local/etc/php
 RUN set -eux; \

@@ -40,7 +40,6 @@ RUN set -eux; \
 	rm -rf /var/lib/apt/lists/*
 
 
-
 ENV PHP_INI_DIR /usr/local/etc/php
 RUN set -eux; \
 	mkdir -p "$PHP_INI_DIR/conf.d"; \

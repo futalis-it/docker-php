@@ -85,10 +85,8 @@ for version; do
 		    cp -a CURL_APKBUILD "$version/$dir/"
 		    if [ "$version" == "8.0" ]; then
 		        sed -i 's/openssl-dev>3/openssl1.1-compat-dev/g' "$version/$dir/CURL_APKBUILD"
+		        cp -ar openssl1.1-compat "$version/$dir/"
 		    fi
-		fi
-		if [ "$version" == "8.0" -a "$suite" == "alpine3.19" ]; then
-		    cp -ar openssl1.1-compat "$version/$dir/"
 		fi
 
 		cmd="$(jq <<<"$cmd" -r '.[0]')"
