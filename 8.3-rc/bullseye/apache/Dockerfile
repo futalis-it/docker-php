@@ -119,9 +119,9 @@ ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
 ENV GPG_KEYS 1198C0117593497A5EC5C199286AF1F9897469DC C28D937575603EB4ABB725861C0779DC5C0A9DE4 AFD8691FDAEDF03BDF6E460563F15A9B715376CA
 
-ENV PHP_VERSION 8.3.8RC1
-ENV PHP_URL="https://downloads.php.net/~eric/php-8.3.8RC1.tar.xz" PHP_ASC_URL="https://downloads.php.net/~eric/php-8.3.8RC1.tar.xz.asc"
-ENV PHP_SHA256="b8ebf3e526e769ceccb44c89e94b29dbcac32718b837380b8fbfaae64a7f87a0"
+ENV PHP_VERSION 8.3.9RC1
+ENV PHP_URL="https://downloads.php.net/~jakub/php-8.3.9RC1.tar.xz" PHP_ASC_URL="https://downloads.php.net/~jakub/php-8.3.9RC1.tar.xz.asc"
+ENV PHP_SHA256="17dcf7f849927d3fb9d675beee821f62fb68e259e231a4bad32e95272446cd06"
 
 RUN set -eux; \
 	\
@@ -227,9 +227,6 @@ RUN set -eux; \
 # in PHP 7.4+, the pecl/pear installers are officially deprecated (requiring an explicit "--with-pear")
 		--with-pear \
 		\
-# bundled pcre does not support JIT on s390x
-# https://manpages.debian.org/bullseye/libpcre3-dev/pcrejit.3.en.html#AVAILABILITY_OF_JIT_SUPPORT
-		$(test "$gnuArch" = 's390x-linux-gnu' && echo '--without-pcre-jit') \
 		--with-libdir="lib/$debMultiarch" \
 		\
 		--disable-cgi \
