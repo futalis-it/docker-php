@@ -4,7 +4,7 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
-FROM debian:bookworm-slim
+FROM debian:bullseye-slim
 
 # prevent Debian's PHP packages from being installed
 # https://github.com/docker-library/php/pull/542
@@ -59,17 +59,19 @@ ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
-ENV GPG_KEYS 1198C0117593497A5EC5C199286AF1F9897469DC C28D937575603EB4ABB725861C0779DC5C0A9DE4 AFD8691FDAEDF03BDF6E460563F15A9B715376CA
+ENV GPG_KEYS AFD8691FDAEDF03BDF6E460563F15A9B715376CA 9D7F99A0CB8F05C8A6958D6256A97AF7600A39A6 0616E93D95AF471243E26761770426E17EBBB3DD
 
-ENV PHP_VERSION 8.3.8RC1
-ENV PHP_URL="https://downloads.php.net/~eric/php-8.3.8RC1.tar.xz" PHP_ASC_URL="https://downloads.php.net/~eric/php-8.3.8RC1.tar.xz.asc"
-ENV PHP_SHA256="b8ebf3e526e769ceccb44c89e94b29dbcac32718b837380b8fbfaae64a7f87a0"
+ENV PHP_VERSION 8.4.0alpha1
+ENV PHP_URL="https://downloads.php.net/~saki/php-8.4.0alpha1.tar.xz" PHP_ASC_URL="https://downloads.php.net/~saki/php-8.4.0alpha1.tar.xz.asc"
+ENV PHP_SHA256="65903a7add51350540b567f8cd2d964ac11366bf33e1b287489765feac45278e"
 
 RUN set -eux; \
 	\
 	savedAptMark="$(apt-mark showmanual)"; \
 	apt-get update; \
 	apt-get install -y --no-install-recommends gnupg; \
+	# Add patchutils; see https://github.com/docker-library/php/pull/1526
+	apt-get install -y --no-install-recommends patchutils; \
 	rm -rf /var/lib/apt/lists/*; \
 	\
 	mkdir -p /usr/src; \
@@ -91,6 +93,12 @@ RUN set -eux; \
 		gpgconf --kill all; \
 		rm -rf "$GNUPGHOME"; \
 	fi; \
+	\
+	# Add patch; see https://github.com/docker-library/php/pull/1526
+	curl -fsSL -o php-pdo.patch 'https://github.com/php/php-src/pull/14797.patch?full_index=1'; \
+	echo '3a95762048a56ec0f59cb9ee18df49751ffb0bdd0e91e021b57f69ac7af62996 *php-pdo.patch' | sha256sum -c -; \
+	filterdiff -p1 -x 'NEWS' < php-pdo.patch > php-pdo.patch.filtered; \
+	mv php-pdo.patch.filtered php-pdo.patch; \
 	\
 	apt-mark auto '.*' > /dev/null; \
 	apt-mark manual $savedAptMark > /dev/null; \
@@ -124,6 +132,9 @@ RUN set -eux; \
 	; \
 	docker-php-source extract; \
 	cd /usr/src/php; \
+# Apply patch; see https://github.com/docker-library/php/pull/1526
+	patch -p1 < ../php-pdo.patch; \
+	./buildconf -f; \
 	gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)"; \
 	debMultiarch="$(dpkg-architecture --query DEB_BUILD_MULTIARCH)"; \
 # https://bugs.php.net/bug.php?id=74125
@@ -168,9 +179,6 @@ RUN set -eux; \
 # in PHP 7.4+, the pecl/pear installers are officially deprecated (requiring an explicit "--with-pear")
 		--with-pear \
 		\
-# bundled pcre does not support JIT on s390x
-# https://manpages.debian.org/bullseye/libpcre3-dev/pcrejit.3.en.html#AVAILABILITY_OF_JIT_SUPPORT
-		$(test "$gnuArch" = 's390x-linux-gnu' && echo '--without-pcre-jit') \
 		--with-libdir="lib/$debMultiarch" \
 		\
 		--disable-cgi \
