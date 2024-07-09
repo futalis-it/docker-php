@@ -1,4 +1,4 @@
-FROM alpine:{{ env.alpineVer }} as curl-builder
+FROM alpine:{{ env.alpineVer }} AS curl-builder
 
 RUN apk upgrade \
     && apk add alpine-sdk

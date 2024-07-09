@@ -1,4 +1,4 @@
-FROM alpine:{{ env.alpineVer }} as openssl1-builder
+FROM alpine:{{ env.alpineVer }} AS openssl1-builder
 
 RUN apk upgrade \
     && apk add alpine-sdk

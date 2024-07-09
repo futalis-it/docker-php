@@ -32,7 +32,7 @@ RUN set -eux; \
 {{ ) else ( -}}
 # (see persistent deps below)
 {{ ) end -}}
-ENV PHPIZE_DEPS \
+ENV PHPIZE_DEPS="\
 		autoconf \
 		dpkg-dev {{ if is_alpine then "dpkg " else "" end }}\
 		file \
@@ -41,7 +41,7 @@ ENV PHPIZE_DEPS \
 		libc-dev \
 		make \
 		{{ if is_alpine then "pkgconf" else "pkg-config" end }} \
-		re2c
+		re2c"
 
 # persistent / runtime deps
 {{ if is_alpine then ( -}}
@@ -77,7 +77,7 @@ COPY --from=curl-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
 RUN apk add /curl-packages/*.apk
 {{ ) else "" end -}}
 
-ENV PHP_INI_DIR /usr/local/etc/php
+ENV PHP_INI_DIR=/usr/local/etc/php
 RUN set -eux; \
 	mkdir -p "$PHP_INI_DIR/conf.d"; \
 # allow running as an arbitrary user (https://github.com/docker-library/php/issues/743)
@@ -87,8 +87,8 @@ RUN set -eux; \
 	chmod 1777 /var/www/html
 
 {{ if env.variant == "apache" then ( -}}
-ENV APACHE_CONFDIR /etc/apache2
-ENV APACHE_ENVVARS $APACHE_CONFDIR/envvars
+ENV APACHE_CONFDIR=/etc/apache2
+ENV APACHE_ENVVARS=$APACHE_CONFDIR/envvars
 
 RUN set -eux; \
 	apt-get update; \
@@ -160,7 +160,7 @@ ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
-ENV GPG_KEYS {{
+ENV GPG_KEYS="{{
 	{
 		# https://www.php.net/gpg-keys.php
 		# https://www.php.net/downloads.php
@@ -208,10 +208,11 @@ ENV GPG_KEYS {{
 	}[env.version | rtrimstr("-rc")] // error("missing GPG keys for " + env.version)
 	| map(gsub(" "; ""))
 	| join(" ")
-}}
+}}"
 
-ENV PHP_VERSION {{ .version }}
-ENV PHP_URL="{{ .url }}" PHP_ASC_URL="{{ .ascUrl // "" }}"
+ENV PHP_VERSION="{{ .version }}"
+ENV PHP_URL="{{ .url }}"
+ENV PHP_ASC_URL="{{ .ascUrl // "" }}"
 ENV PHP_SHA256="{{ .sha256 // "" }}"
 
 RUN set -eux; \
