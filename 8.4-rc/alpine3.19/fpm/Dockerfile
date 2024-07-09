@@ -4,7 +4,7 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
-FROM alpine:3.20 as curl-builder
+FROM alpine:3.19 as curl-builder
 
 RUN apk upgrade \
     && apk add alpine-sdk
@@ -22,7 +22,7 @@ COPY CURL_APKBUILD /root/APKBUILD
 
 RUN abuild -Fr
 
-FROM futalisde/httpd:2.4-alpine3.20
+FROM futalisde/httpd:2.4-alpine3.19
 
 # dependencies required for running "phpize"
 # these get automatically installed and removed by "docker-php-ext-*" (unless they're already installed)
@@ -70,15 +70,17 @@ ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
-ENV GPG_KEYS 1198C0117593497A5EC5C199286AF1F9897469DC C28D937575603EB4ABB725861C0779DC5C0A9DE4 AFD8691FDAEDF03BDF6E460563F15A9B715376CA
+ENV GPG_KEYS AFD8691FDAEDF03BDF6E460563F15A9B715376CA 9D7F99A0CB8F05C8A6958D6256A97AF7600A39A6 0616E93D95AF471243E26761770426E17EBBB3DD
 
-ENV PHP_VERSION 8.3.9
-ENV PHP_URL="https://www.php.net/distributions/php-8.3.9.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-8.3.9.tar.xz.asc"
-ENV PHP_SHA256="bf4d7b8ea60a356064f88485278bd6f941a230ec16f0fc401574ce1445ad6c77"
+ENV PHP_VERSION 8.4.0alpha1
+ENV PHP_URL="https://downloads.php.net/~saki/php-8.4.0alpha1.tar.xz" PHP_ASC_URL="https://downloads.php.net/~saki/php-8.4.0alpha1.tar.xz.asc"
+ENV PHP_SHA256="65903a7add51350540b567f8cd2d964ac11366bf33e1b287489765feac45278e"
 
 RUN set -eux; \
 	\
 	apk add --no-cache --virtual .fetch-deps gnupg; \
+	# Add patchutils; see https://github.com/docker-library/php/pull/1526
+	apk add --no-cache --virtual .patch-deps patchutils; \
 	\
 	mkdir -p /usr/src; \
 	cd /usr/src; \
@@ -100,6 +102,13 @@ RUN set -eux; \
 		rm -rf "$GNUPGHOME"; \
 	fi; \
 	\
+	# Add patch; see https://github.com/docker-library/php/pull/1526
+	curl -fsSL -o php-pdo.patch 'https://github.com/php/php-src/pull/14797.patch?full_index=1'; \
+	echo '3a95762048a56ec0f59cb9ee18df49751ffb0bdd0e91e021b57f69ac7af62996 *php-pdo.patch' | sha256sum -c -; \
+	filterdiff -p1 -x 'NEWS' < php-pdo.patch > php-pdo.patch.filtered; \
+	mv php-pdo.patch.filtered php-pdo.patch; \
+	\
+	apk del --no-network .patch-deps; \
 	apk del --no-network .fetch-deps
 
 COPY docker-php-source /usr/local/bin/
@@ -116,6 +125,7 @@ RUN set -eux; \
 		linux-headers \
 		oniguruma-dev \
 		openssl-dev \
+		patch \
 		readline-dev \
 		sqlite-dev \
 	; \
@@ -133,6 +143,9 @@ RUN set -eux; \
 	; \
 	docker-php-source extract; \
 	cd /usr/src/php; \
+# Apply patch; see https://github.com/docker-library/php/pull/1526
+	patch -p1 < ../php-pdo.patch; \
+	./buildconf -f; \
 	gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)"; \
 	./configure \
 		--build="$gnuArch" \
