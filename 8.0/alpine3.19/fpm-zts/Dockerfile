@@ -48,7 +48,7 @@ FROM futalisde/httpd:2.4-alpine3.19
 
 # dependencies required for running "phpize"
 # these get automatically installed and removed by "docker-php-ext-*" (unless they're already installed)
-ENV PHPIZE_DEPS=\
+ENV PHPIZE_DEPS="\
 		autoconf \
 		dpkg-dev dpkg \
 		file \
@@ -57,7 +57,7 @@ ENV PHPIZE_DEPS=\
 		libc-dev \
 		make \
 		pkgconf \
-		re2c
+		re2c"
 
 # persistent / runtime deps
 RUN apk upgrade --no-cache \
@@ -96,7 +96,7 @@ ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
-ENV GPG_KEYS 1729F83938DA44E27BA0F4D3DBDB397470D12172 BFDDD28642824F8118EF77909B67A5C12229118F 2C16C765DBE54A088130F1BC4B9B5F600B55F3B4 39B641343D8C104B2B146DC3F9C39DC0B9698544
+ENV GPG_KEYS="1729F83938DA44E27BA0F4D3DBDB397470D12172 BFDDD28642824F8118EF77909B67A5C12229118F 2C16C765DBE54A088130F1BC4B9B5F600B55F3B4 39B641343D8C104B2B146DC3F9C39DC0B9698544"
 
 ENV PHP_VERSION="8.0.30"
 ENV PHP_URL="https://www.php.net/distributions/php-8.0.30.tar.xz"

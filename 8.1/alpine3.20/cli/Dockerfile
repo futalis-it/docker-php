@@ -26,7 +26,7 @@ FROM alpine:3.20
 
 # dependencies required for running "phpize"
 # these get automatically installed and removed by "docker-php-ext-*" (unless they're already installed)
-ENV PHPIZE_DEPS \
+ENV PHPIZE_DEPS="\
 		autoconf \
 		dpkg-dev dpkg \
 		file \
@@ -35,7 +35,7 @@ ENV PHPIZE_DEPS \
 		libc-dev \
 		make \
 		pkgconf \
-		re2c
+		re2c"
 
 # persistent / runtime deps
 RUN apk upgrade --no-cache \
@@ -70,7 +70,7 @@ ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
-ENV GPG_KEYS 528995BFEDFBA7191D46839EF9BA0ADA31CBD89E 39B641343D8C104B2B146DC3F9C39DC0B9698544 F1F692238FBC1666E5A5CCD4199F9DFEF6FFBAFD
+ENV GPG_KEYS="528995BFEDFBA7191D46839EF9BA0ADA31CBD89E 39B641343D8C104B2B146DC3F9C39DC0B9698544 F1F692238FBC1666E5A5CCD4199F9DFEF6FFBAFD"
 
 ENV PHP_VERSION="8.1.29"
 ENV PHP_URL="https://www.php.net/distributions/php-8.1.29.tar.xz"

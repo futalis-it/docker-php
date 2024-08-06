@@ -49,9 +49,9 @@
   },
   "8.1-rc": null,
   "8.2": {
-    "ascUrl": "https://www.php.net/distributions/php-8.2.21.tar.xz.asc",
-    "sha256": "8cc44d51bb2506399ec176f70fe110f0c9e1f7d852a5303a2cd1403402199707",
-    "url": "https://www.php.net/distributions/php-8.2.21.tar.xz",
+    "ascUrl": "https://www.php.net/distributions/php-8.2.22.tar.xz.asc",
+    "sha256": "8566229bc88ad1f4aadc10700ab5fbcec81587c748999d985f11cf3b745462df",
+    "url": "https://www.php.net/distributions/php-8.2.22.tar.xz",
     "variants": [
       "bookworm/cli",
       "bookworm/apache",
@@ -72,13 +72,13 @@
       "alpine3.19/zts",
       "alpine3.19/fpm-zts"
     ],
-    "version": "8.2.21"
+    "version": "8.2.22"
   },
   "8.2-rc": null,
   "8.3": {
-    "ascUrl": "https://www.php.net/distributions/php-8.3.9.tar.xz.asc",
-    "sha256": "bf4d7b8ea60a356064f88485278bd6f941a230ec16f0fc401574ce1445ad6c77",
-    "url": "https://www.php.net/distributions/php-8.3.9.tar.xz",
+    "ascUrl": "https://www.php.net/distributions/php-8.3.10.tar.xz.asc",
+    "sha256": "a0f2179d00931fe7631a12cbc3428f898ca3d99fe564260c115af381d2a1978d",
+    "url": "https://www.php.net/distributions/php-8.3.10.tar.xz",
     "variants": [
       "bookworm/cli",
       "bookworm/apache",
@@ -99,13 +99,13 @@
       "alpine3.19/zts",
       "alpine3.19/fpm-zts"
     ],
-    "version": "8.3.9"
+    "version": "8.3.10"
   },
   "8.3-rc": null,
   "8.4-rc": {
-    "ascUrl": "https://downloads.php.net/~saki/php-8.4.0alpha1.tar.xz.asc",
-    "sha256": "65903a7add51350540b567f8cd2d964ac11366bf33e1b287489765feac45278e",
-    "url": "https://downloads.php.net/~saki/php-8.4.0alpha1.tar.xz",
+    "ascUrl": "https://downloads.php.net/~calvinb/php-8.4.0alpha2.tar.xz.asc",
+    "sha256": "12495b447da6aeb0e16b3db1a9d68f5c9d41bcc097ff1cc5d43732a47a7fd5b1",
+    "url": "https://downloads.php.net/~calvinb/php-8.4.0alpha2.tar.xz",
     "variants": [
       "bookworm/cli",
       "bookworm/apache",
@@ -126,6 +126,6 @@
       "alpine3.19/zts",
       "alpine3.19/fpm-zts"
     ],
-    "version": "8.4.0alpha1"
+    "version": "8.4.0alpha2"
   }
 }
