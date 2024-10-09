@@ -44,7 +44,7 @@ COPY CURL_APKBUILD /root/APKBUILD
 
 RUN abuild -Fr
 
-FROM futalisde/httpd:2.4-alpine3.19
+FROM futalis/httpd:2.4-alpine3.19
 
 # dependencies required for running "phpize"
 # these get automatically installed and removed by "docker-php-ext-*" (unless they're already installed)

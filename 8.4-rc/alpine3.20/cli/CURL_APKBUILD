@@ -8,7 +8,7 @@
 # this aport from arch=all WILL be reverted.
 
 pkgname=curl
-pkgver=8.9.1
+pkgver=8.10.1
 pkgrel=0
 pkgdesc="URL retrival utility and library"
 url="https://curl.se/"
@@ -35,6 +35,8 @@ options="net" # Required for running tests
 [ -n "$BOOTSTRAP" ] && options="$options !check" # remove python3 dependency
 
 # secfixes:
+#   8.10.0-r0:
+#     - CVE-2024-8096
 #   8.9.1-r0:
 #     - CVE-2024-7264
 #   8.9.0-r0:
@@ -240,5 +242,5 @@ libcurl() {
 }
 
 sha512sums="
-a0fe234402875db194aad4e4208b7e67e7ffc1562622eea90948d4b9b0122c95c3dde8bbe2f7445a687cb3de7cb09f20e5819d424570442d976aa4c913227fc7  curl-8.9.1.tar.xz
+f1c7a12492dcfb8ba08be69b96a83ce9074592cbaa6b95c72b3c16fc58ad35e9f9deec7b72baca7d360d013b0b1c7ea38bd4edae464903ac67aa3c76238d8c6c  curl-8.10.1.tar.xz
 "

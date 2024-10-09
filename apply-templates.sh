@@ -47,7 +47,7 @@ for version; do
 
 		alpineVer="${suite#alpine}" # "3.12", etc
 		if [ "$suite" != "$alpineVer" ]; then
-			from="futalisde/httpd:2.4-alpine$alpineVer"
+			from="futalis/httpd:2.4-alpine$alpineVer"
 			if [ "$variant" == "cli" ]; then
 			    from="alpine:$alpineVer"
 			fi
