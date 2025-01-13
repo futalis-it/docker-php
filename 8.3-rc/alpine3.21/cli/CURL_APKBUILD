@@ -8,7 +8,7 @@
 # this aport from arch=all WILL be reverted.
 
 pkgname=curl
-pkgver=8.11.0
+pkgver=8.11.1
 pkgrel=0
 pkgdesc="URL retrival utility and library"
 url="https://curl.se/"
@@ -39,6 +39,8 @@ if [ -n "$BOOTSTRAP" ] || [ -n "$APORTS_BOOTSTRAP" ]; then
 fi
 
 # secfixes:
+#   8.11.1-r0:
+#     - CVE-2024-11053
 #   8.11.0-r0:
 #     - CVE-2024-9681
 #   8.10.0-r0:
@@ -248,5 +250,5 @@ libcurl() {
 }
 
 sha512sums="
-3a642d421e0a5c09ecb681bea18498f2c6124e9af4d8afdc074dfb85a9b0211d8972ade9cf00ab44b5dfed9303262cd83551dd3b5e0976d11fc19da3c4a0987e  curl-8.11.0.tar.xz
+7c7c47a49505575b610c56b455f0919ea5082a993bf5483eeb258ead167aadb87078d626b343b417dcfc5439c53556425c8fb4fe3b01b53a87b47c01686a3e57  curl-8.11.1.tar.xz
 "
