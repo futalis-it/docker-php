@@ -4,29 +4,11 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
-FROM alpine:3.19 AS curl-builder
-
-RUN apk upgrade \
-    && apk add alpine-sdk
-
-
-RUN mkdir -p /var/cache/distfiles \
-    && chmod a+w /var/cache/distfiles
-
-WORKDIR /root
-
-RUN abuild-keygen -an \
-    && cp /root/.abuild/-*.rsa.pub /etc/apk/keys/
-
-COPY CURL_APKBUILD /root/APKBUILD
-
-RUN abuild -Fr
-
-FROM futalis/httpd:2.4-alpine3.19
+FROM alpine:3.21
 
 # dependencies required for running "phpize"
 # these get automatically installed and removed by "docker-php-ext-*" (unless they're already installed)
-ENV PHPIZE_DEPS="\
+ENV PHPIZE_DEPS \
 		autoconf \
 		dpkg-dev dpkg \
 		file \
@@ -35,23 +17,25 @@ ENV PHPIZE_DEPS="\
 		libc-dev \
 		make \
 		pkgconf \
-		re2c"
+		re2c
 
 # persistent / runtime deps
-RUN apk upgrade --no-cache \
-    && apk add --no-cache \
+RUN apk add --no-cache \
 		ca-certificates \
+		curl \
 		openssl \
 		tar \
 		xz
 
+# ensure www-data user exists
+RUN set -eux; \
+	adduser -u 82 -D -S -G www-data www-data
+# 82 is the standard uid/gid for "www-data" in Alpine
+# https://git.alpinelinux.org/aports/tree/main/apache2/apache2.pre-install?h=3.14-stable
+# https://git.alpinelinux.org/aports/tree/main/lighttpd/lighttpd.pre-install?h=3.14-stable
+# https://git.alpinelinux.org/aports/tree/main/nginx/nginx.pre-install?h=3.14-stable
 
-
-COPY --from=curl-builder /root/packages/x86_64 /curl-packages
-COPY --from=curl-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
-RUN apk add /curl-packages/*.apk
-
-ENV PHP_INI_DIR=/usr/local/etc/php
+ENV PHP_INI_DIR /usr/local/etc/php
 RUN set -eux; \
 	mkdir -p "$PHP_INI_DIR/conf.d"; \
 # allow running as an arbitrary user (https://github.com/docker-library/php/issues/743)
@@ -70,12 +54,11 @@ ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
-ENV GPG_KEYS="39B641343D8C104B2B146DC3F9C39DC0B9698544 E60913E4DF209907D8E30D96659A97C9CF2A795A 1198C0117593497A5EC5C199286AF1F9897469DC"
+ENV GPG_KEYS AFD8691FDAEDF03BDF6E460563F15A9B715376CA 9D7F99A0CB8F05C8A6958D6256A97AF7600A39A6 0616E93D95AF471243E26761770426E17EBBB3DD
 
-ENV PHP_VERSION="8.2.25"
-ENV PHP_URL="https://www.php.net/distributions/php-8.2.25.tar.xz"
-ENV PHP_ASC_URL="https://www.php.net/distributions/php-8.2.25.tar.xz.asc"
-ENV PHP_SHA256="330b54876ea1d05ade12ee9726167332058bccd58dffa1d4e12117f6b4f616b9"
+ENV PHP_VERSION 8.4.3RC1
+ENV PHP_URL="https://downloads.php.net/~saki/php-8.4.3RC1.tar.xz" PHP_ASC_URL="https://downloads.php.net/~saki/php-8.4.3RC1.tar.xz.asc"
+ENV PHP_SHA256="dc60e2ba8fb4ae492f7732c7146f9a0717a08c73db4bd4b6b15babc3138c8256"
 
 RUN set -eux; \
 	\
@@ -129,7 +112,7 @@ RUN set -eux; \
 		CPPFLAGS="$PHP_CPPFLAGS" \
 		LDFLAGS="$PHP_LDFLAGS" \
 # https://github.com/php/php-src/blob/d6299206dd828382753453befd1b915491b741c6/configure.ac#L1496-L1511
-		PHP_BUILD_PROVIDER='https://github.com/futalis-it/docker-php' \
+		PHP_BUILD_PROVIDER='https://github.com/docker-library/php' \
 		PHP_UNAME='Linux - Docker' \
 	; \
 	docker-php-source extract; \
@@ -174,10 +157,6 @@ RUN set -eux; \
 # in PHP 7.4+, the pecl/pear installers are officially deprecated (requiring an explicit "--with-pear")
 		--with-pear \
 		\
-# bundled pcre does not support JIT on riscv64 until 10.41 (php 8.3+)
-# https://github.com/PCRE2Project/pcre2/commits/pcre2-10.41/src/sljit/sljitNativeRISCV_64.c
-# https://github.com/php/php-src/tree/php-8.3.0/ext/pcre/pcre2lib
-		$(test "$gnuArch" = 'riscv64-linux-musl' && echo '--without-pcre-jit') \
 		\
 # https://github.com/docker-library/php/pull/939#issuecomment-730501748
 		--enable-embed \
@@ -185,7 +164,6 @@ RUN set -eux; \
 		--enable-zts \
 # https://externals.io/message/118859
 		--disable-zend-signals \
-		--enable-zend-max-execution-timers \
 	; \
 	make -j "$(nproc)"; \
 	find -type f -name '*.a' -delete; \
