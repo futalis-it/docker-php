@@ -22,7 +22,7 @@ COPY CURL_APKBUILD /root/APKBUILD
 
 RUN abuild -Fr
 
-FROM futalis/httpd:2.4-alpine3.20
+FROM europe-west10-docker.pkg.dev/futalis-1544014797945/images/httpd:2.4-alpine3.20
 
 # dependencies required for running "phpize"
 # these get automatically installed and removed by "docker-php-ext-*" (unless they're already installed)
@@ -72,10 +72,10 @@ ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
 ENV GPG_KEYS="AFD8691FDAEDF03BDF6E460563F15A9B715376CA 9D7F99A0CB8F05C8A6958D6256A97AF7600A39A6 0616E93D95AF471243E26761770426E17EBBB3DD"
 
-ENV PHP_VERSION="8.4.2"
-ENV PHP_URL="https://www.php.net/distributions/php-8.4.2.tar.xz"
-ENV PHP_ASC_URL="https://www.php.net/distributions/php-8.4.2.tar.xz.asc"
-ENV PHP_SHA256="92636453210f7f2174d6ee6df17a5811368f556a6c2c2cbcf019321e36456e01"
+ENV PHP_VERSION="8.4.4"
+ENV PHP_URL="https://www.php.net/distributions/php-8.4.4.tar.xz"
+ENV PHP_ASC_URL="https://www.php.net/distributions/php-8.4.4.tar.xz.asc"
+ENV PHP_SHA256="05a6c9a2cc894dd8be719ecab221b311886d5e0c02cb6fac648dd9b3459681ac"
 
 RUN set -eux; \
 	\
