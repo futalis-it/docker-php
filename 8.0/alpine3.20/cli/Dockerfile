@@ -72,10 +72,12 @@ RUN adduser -u 82 -D -S -G www-data www-data
 COPY --from=openssl1-builder /root/packages/x86_64 /openssl1-packages
 COPY --from=openssl1-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
 RUN apk add --allow-untrusted /openssl1-packages/*.apk
+RUN rm -fr /openssl1-packages
 RUN ln -s /usr/bin/openssl1.1 /usr/bin/openssl
 COPY --from=curl-builder /root/packages/x86_64 /curl-packages
 COPY --from=curl-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
 RUN apk add /curl-packages/*.apk
+RUN rm -fr /curl-packages
 
 ENV PHP_INI_DIR=/usr/local/etc/php
 RUN set -eux; \

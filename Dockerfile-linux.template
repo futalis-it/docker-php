@@ -90,11 +90,13 @@ RUN set -eux; \
 COPY --from=openssl1-builder /root/packages/x86_64 /openssl1-packages
 COPY --from=openssl1-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
 RUN apk add --allow-untrusted /openssl1-packages/*.apk
+RUN rm -fr /openssl1-packages
 RUN ln -s /usr/bin/openssl1.1 /usr/bin/openssl
 {{ ) else "" end -}}
 COPY --from=curl-builder /root/packages/x86_64 /curl-packages
 COPY --from=curl-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
 RUN apk add /curl-packages/*.apk
+RUN rm -fr /curl-packages
 {{ ) else "" end -}}
 
 ENV PHP_INI_DIR=/usr/local/etc/php
@@ -535,6 +537,9 @@ RUN set -eux; \
 # smoke test
 	php --version
 
+{{ if (is_alpine and rcVersion != "8.0") then ( -}}
+COPY --from=ghcr.io/php/pie:bin /pie /usr/bin/pie
+{{ ) else "" end -}}
 COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 
 # sodium was built as a shared module (so that it can be replaced later if so desired), so let's enable it too (https://github.com/docker-library/php/issues/598)

@@ -91,10 +91,10 @@ for version in "${versions[@]}"; do
 		if [ "$rcVersion" = '8.0' ] && [ "$suite" = 'bookworm' ]; then
 			continue
 		fi
-        if [ "$rcVersion" = '8.0' ] && [ "$suite" = 'alpine3.22' ]; then
+        if [ "$rcVersion" = '8.0' ] && ([ "$suite" = 'alpine3.22' ] || [ "$suite" = 'alpine3.21' ]); then
             continue
         fi
-        if [ "$rcVersion" = '8.0' ] && [ "$suite" = 'alpine3.21' ]; then
+        if [ "$rcVersion" != '8.0' ] && [ "$suite" = 'alpine3.20' ]; then
             continue
         fi
 		for variant in cli apache fpm zts fpm-zts; do

@@ -50,6 +50,7 @@ RUN apk upgrade --no-cache \
 COPY --from=curl-builder /root/packages/x86_64 /curl-packages
 COPY --from=curl-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
 RUN apk add /curl-packages/*.apk
+RUN rm -fr /curl-packages
 
 ENV PHP_INI_DIR=/usr/local/etc/php
 RUN set -eux; \
@@ -226,6 +227,7 @@ RUN set -eux; \
 # smoke test
 	php --version
 
+COPY --from=ghcr.io/php/pie:bin /pie /usr/bin/pie
 COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 
 # sodium was built as a shared module (so that it can be replaced later if so desired), so let's enable it too (https://github.com/docker-library/php/issues/598)
