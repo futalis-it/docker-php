@@ -1,26 +1,31 @@
 {
   "8.0": {
+    "version": "8.0.30",
+    "url": "https://www.php.net/distributions/php-8.0.30.tar.xz",
     "ascUrl": "https://www.php.net/distributions/php-8.0.30.tar.xz.asc",
     "sha256": "216ab305737a5d392107112d618a755dc5df42058226f1670e9db90e77d777d9",
-    "url": "https://www.php.net/distributions/php-8.0.30.tar.xz",
     "variants": [
       "bullseye/cli",
       "bullseye/apache",
       "bullseye/fpm",
       "bullseye/zts",
       "bullseye/fpm-zts",
+      "alpine3.22/cli",
+      "alpine3.22/fpm",
+      "alpine3.22/zts",
+      "alpine3.22/fpm-zts",
       "alpine3.20/cli",
       "alpine3.20/fpm",
       "alpine3.20/zts",
       "alpine3.20/fpm-zts"
-    ],
-    "version": "8.0.30"
+    ]
   },
   "8.0-rc": null,
   "8.1": {
-    "ascUrl": "https://www.php.net/distributions/php-8.1.31.tar.xz.asc",
-    "sha256": "c4f244d46ba51c72f7d13d4f66ce6a9e9a8d6b669c51be35e01765ba58e7afca",
-    "url": "https://www.php.net/distributions/php-8.1.31.tar.xz",
+    "version": "8.1.32",
+    "url": "https://www.php.net/distributions/php-8.1.32.tar.xz",
+    "ascUrl": "https://www.php.net/distributions/php-8.1.32.tar.xz.asc",
+    "sha256": "c582ac682a280bbc69bc2186c21eb7e3313cc73099be61a6bc1d2cd337cbf383",
     "variants": [
       "bookworm/cli",
       "bookworm/apache",
@@ -32,6 +37,10 @@
       "bullseye/fpm",
       "bullseye/zts",
       "bullseye/fpm-zts",
+      "alpine3.22/cli",
+      "alpine3.22/fpm",
+      "alpine3.22/zts",
+      "alpine3.22/fpm-zts",
       "alpine3.21/cli",
       "alpine3.21/fpm",
       "alpine3.21/zts",
@@ -40,14 +49,14 @@
       "alpine3.20/fpm",
       "alpine3.20/zts",
       "alpine3.20/fpm-zts"
-    ],
-    "version": "8.1.31"
+    ]
   },
   "8.1-rc": null,
   "8.2": {
-    "ascUrl": "https://www.php.net/distributions/php-8.2.27.tar.xz.asc",
-    "sha256": "3eec91294d8c09b3df80b39ec36d574ed9b05de4c8afcb25fa215d48f9ecbc6b",
-    "url": "https://www.php.net/distributions/php-8.2.27.tar.xz",
+    "version": "8.2.28",
+    "url": "https://www.php.net/distributions/php-8.2.28.tar.xz",
+    "ascUrl": "https://www.php.net/distributions/php-8.2.28.tar.xz.asc",
+    "sha256": "af8c9153153a7f489153b7a74f2f29a5ee36f5cb2c6c6929c98411a577e89c91",
     "variants": [
       "bookworm/cli",
       "bookworm/apache",
@@ -59,6 +68,10 @@
       "bullseye/fpm",
       "bullseye/zts",
       "bullseye/fpm-zts",
+      "alpine3.22/cli",
+      "alpine3.22/fpm",
+      "alpine3.22/zts",
+      "alpine3.22/fpm-zts",
       "alpine3.21/cli",
       "alpine3.21/fpm",
       "alpine3.21/zts",
@@ -67,14 +80,14 @@
       "alpine3.20/fpm",
       "alpine3.20/zts",
       "alpine3.20/fpm-zts"
-    ],
-    "version": "8.2.27"
+    ]
   },
   "8.2-rc": null,
   "8.3": {
-    "ascUrl": "https://www.php.net/distributions/php-8.3.17.tar.xz.asc",
-    "sha256": "6158ee678e698395da13d72c7679a406d2b7554323432f14d37b60ed87d8ccfb",
-    "url": "https://www.php.net/distributions/php-8.3.17.tar.xz",
+    "version": "8.3.22",
+    "url": "https://www.php.net/distributions/php-8.3.22.tar.xz",
+    "ascUrl": "https://www.php.net/distributions/php-8.3.22.tar.xz.asc",
+    "sha256": "66c86889059bd27ccf460590ca48fcaf3261349cc9bdba2023ac6a265beabf36",
     "variants": [
       "bookworm/cli",
       "bookworm/apache",
@@ -86,6 +99,10 @@
       "bullseye/fpm",
       "bullseye/zts",
       "bullseye/fpm-zts",
+      "alpine3.22/cli",
+      "alpine3.22/fpm",
+      "alpine3.22/zts",
+      "alpine3.22/fpm-zts",
       "alpine3.21/cli",
       "alpine3.21/fpm",
       "alpine3.21/zts",
@@ -94,14 +111,14 @@
       "alpine3.20/fpm",
       "alpine3.20/zts",
       "alpine3.20/fpm-zts"
-    ],
-    "version": "8.3.17"
+    ]
   },
   "8.3-rc": null,
   "8.4": {
-    "ascUrl": "https://www.php.net/distributions/php-8.4.4.tar.xz.asc",
-    "sha256": "05a6c9a2cc894dd8be719ecab221b311886d5e0c02cb6fac648dd9b3459681ac",
-    "url": "https://www.php.net/distributions/php-8.4.4.tar.xz",
+    "version": "8.4.8",
+    "url": "https://www.php.net/distributions/php-8.4.8.tar.xz",
+    "ascUrl": "https://www.php.net/distributions/php-8.4.8.tar.xz.asc",
+    "sha256": "aa6a4d330b47eacd83e351658ba8c47747a1e4356456219cfb6d75e7838da091",
     "variants": [
       "bookworm/cli",
       "bookworm/apache",
@@ -113,6 +130,10 @@
       "bullseye/fpm",
       "bullseye/zts",
       "bullseye/fpm-zts",
+      "alpine3.22/cli",
+      "alpine3.22/fpm",
+      "alpine3.22/zts",
+      "alpine3.22/fpm-zts",
       "alpine3.21/cli",
       "alpine3.21/fpm",
       "alpine3.21/zts",
@@ -121,8 +142,7 @@
       "alpine3.20/fpm",
       "alpine3.20/zts",
       "alpine3.20/fpm-zts"
-    ],
-    "version": "8.4.4"
+    ]
   },
   "8.4-rc": null
 }

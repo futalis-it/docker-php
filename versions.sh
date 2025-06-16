@@ -82,6 +82,7 @@ for version in "${versions[@]}"; do
 	for suite in \
 		bookworm \
 		bullseye \
+		alpine3.22 \
 		alpine3.21 \
 		alpine3.20 \
 	; do
@@ -90,7 +91,7 @@ for version in "${versions[@]}"; do
 		if [ "$rcVersion" = '8.0' ] && [ "$suite" = 'bookworm' ]; then
 			continue
 		fi
-        if [ "$rcVersion" = '8.0' ] && [ "$suite" = 'alpine3.21' ]; then
+        if [ "$rcVersion" = '8.0' ] && [ "$suite" != 'alpine3.20' ]; then
             continue
         fi
 		for variant in cli apache fpm zts fpm-zts; do
