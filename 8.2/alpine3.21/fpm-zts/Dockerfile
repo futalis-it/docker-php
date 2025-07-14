@@ -73,10 +73,10 @@ ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
 ENV GPG_KEYS="39B641343D8C104B2B146DC3F9C39DC0B9698544 E60913E4DF209907D8E30D96659A97C9CF2A795A 1198C0117593497A5EC5C199286AF1F9897469DC"
 
-ENV PHP_VERSION="8.2.28"
-ENV PHP_URL="https://www.php.net/distributions/php-8.2.28.tar.xz"
-ENV PHP_ASC_URL="https://www.php.net/distributions/php-8.2.28.tar.xz.asc"
-ENV PHP_SHA256="af8c9153153a7f489153b7a74f2f29a5ee36f5cb2c6c6929c98411a577e89c91"
+ENV PHP_VERSION="8.2.29"
+ENV PHP_URL="https://www.php.net/distributions/php-8.2.29.tar.xz"
+ENV PHP_ASC_URL="https://www.php.net/distributions/php-8.2.29.tar.xz.asc"
+ENV PHP_SHA256="475f991afd2d5b901fb410be407d929bc00c46285d3f439a02c59e8b6fe3589c"
 
 RUN set -eux; \
 	\
@@ -228,6 +228,9 @@ RUN set -eux; \
 
 COPY --from=ghcr.io/php/pie:bin /pie /usr/bin/pie
 COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
+
+# enable OPcache by default (https://wiki.php.net/rfc/make_opcache_required)
+RUN docker-php-ext-enable opcache
 
 # sodium was built as a shared module (so that it can be replaced later if so desired), so let's enable it too (https://github.com/docker-library/php/issues/598)
 RUN docker-php-ext-enable sodium

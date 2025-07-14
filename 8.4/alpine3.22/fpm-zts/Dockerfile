@@ -73,10 +73,10 @@ ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
 ENV GPG_KEYS="AFD8691FDAEDF03BDF6E460563F15A9B715376CA 9D7F99A0CB8F05C8A6958D6256A97AF7600A39A6 0616E93D95AF471243E26761770426E17EBBB3DD"
 
-ENV PHP_VERSION="8.4.8"
-ENV PHP_URL="https://www.php.net/distributions/php-8.4.8.tar.xz"
-ENV PHP_ASC_URL="https://www.php.net/distributions/php-8.4.8.tar.xz.asc"
-ENV PHP_SHA256="aa6a4d330b47eacd83e351658ba8c47747a1e4356456219cfb6d75e7838da091"
+ENV PHP_VERSION="8.4.10"
+ENV PHP_URL="https://www.php.net/distributions/php-8.4.10.tar.xz"
+ENV PHP_ASC_URL="https://www.php.net/distributions/php-8.4.10.tar.xz.asc"
+ENV PHP_SHA256="14983a9ef8800e6bc2d920739fd386054402f7976ca9cd7f711509496f0d2632"
 
 RUN set -eux; \
 	\
@@ -223,6 +223,9 @@ RUN set -eux; \
 
 COPY --from=ghcr.io/php/pie:bin /pie /usr/bin/pie
 COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
+
+# enable OPcache by default (https://wiki.php.net/rfc/make_opcache_required)
+RUN docker-php-ext-enable opcache
 
 # sodium was built as a shared module (so that it can be replaced later if so desired), so let's enable it too (https://github.com/docker-library/php/issues/598)
 RUN docker-php-ext-enable sodium
