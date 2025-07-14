@@ -9,7 +9,7 @@
 maintainer="fossdd <fossdd@pwned.life>"
 pkgname=curl
 pkgver=8.14.1
-pkgrel=1
+pkgrel=2
 pkgdesc="URL retrival utility and library"
 url="https://curl.se/"
 arch="all"
@@ -30,9 +30,11 @@ makedepends_host="$depends_dev"
 makedepends_build="groff perl"
 subpackages="$pkgname-dbg $pkgname-static $pkgname-doc $pkgname-dev libcurl"
 if [ -z "$BOOTSTRAP" ] && [ -z "$APORTS_BOOTSTRAP" ]; then
-	subpackages="$subpackages $pkgname-zsh-completion"
+	subpackages="$subpackages $pkgname-zsh-completion $pkgname-fish-completion"
 fi
-source="https://curl.se/download/curl-$pkgver.tar.xz"
+source="https://curl.se/download/curl-$pkgver.tar.xz
+	fix-returncode-with-retry.patch
+	"
 options="net" # Required for running tests
 if [ -n "$BOOTSTRAP" ] || [ -n "$APORTS_BOOTSTRAP" ]; then
 	options="$options !check" # remove python3 dependency
@@ -227,6 +229,7 @@ build() {
 		--with-ca-bundle=/etc/ssl/certs/ca-certificates.crt \
 		--with-ca-path=/etc/ssl/certs \
 		--with-zsh-functions-dir \
+		--with-fish-functions-dir \
 		--disable-ldap \
 		--with-pic \
 		--enable-websockets \
@@ -252,6 +255,8 @@ package() {
 	if [ -z "$BOOTSTRAP" ] && [ -z "$APORTS_BOOTSTRAP" ]; then
 		install -Dm644 scripts/_curl -t \
 			"$pkgdir"/usr/share/zsh/site-functions/
+		install -Dm644 scripts/curl.fish -t \
+			"$pkgdir"/usr/share/fish/vendor_completions.d/
 	fi
 }
 
@@ -269,4 +274,5 @@ dev() {
 
 sha512sums="
 7f6eae04cc23c50fc41d448aa28dfa59141018009e42c5b1e3f4e0d40c0633460b4e6eec05dfc290f7953671096abfa70a8b5443fccdd3f1be6be32ac10b31d9  curl-8.14.1.tar.xz
+4324a97b532b9d9c35fa79b475aab36c2a47ad49c676c8e2129feedc279501e712fad100af76a98c3ffb8b951d8c591f4e45dee6e6e85d25189223a10aa3f733  fix-returncode-with-retry.patch
 "

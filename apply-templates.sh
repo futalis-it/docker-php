@@ -86,9 +86,9 @@ for version; do
 			cp -a apache2-foreground "$version/$dir/"
 		fi
 		if [ "$suite" != "$alpineVer" ]; then
-		    cp -a CURL_APKBUILD "$version/$dir/"
+		    cp -ar curl "$version/$dir/"
 		    if [ "$version" == "8.0" ]; then
-		        sed -i 's/openssl-dev>3/openssl1.1-compat-dev/g' "$version/$dir/CURL_APKBUILD"
+		        sed -i 's/openssl-dev>3/openssl1.1-compat-dev/g' "$version/$dir/curl/APKBUILD"
 		        cp -ar openssl1.1-compat "$version/$dir/"
 		    fi
 		fi
