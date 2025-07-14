@@ -18,7 +18,7 @@ WORKDIR /root
 RUN abuild-keygen -an \
     && cp /root/.abuild/-*.rsa.pub /etc/apk/keys/
 
-COPY CURL_APKBUILD /root/APKBUILD
+COPY curl/* /root/
 
 RUN abuild -Fr
 
