@@ -71,12 +71,20 @@ ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
-ENV GPG_KEYS="1198C0117593497A5EC5C199286AF1F9897469DC 49D9AF6BC72A80D6691719C8AA23F5BE9C7097D4 D95C03BC702BE9515344AE3374E44BC9067701A5"
+<<<<<<<< HEAD:8.3/alpine3.21/fpm-zts/Dockerfile
+ENV GPG_KEYS="1198C0117593497A5EC5C199286AF1F9897469DC C28D937575603EB4ABB725861C0779DC5C0A9DE4 AFD8691FDAEDF03BDF6E460563F15A9B715376CA"
 
-ENV PHP_VERSION="8.5.0alpha1"
-ENV PHP_URL="https://downloads.php.net/~daniels/php-8.5.0alpha1.tar.xz"
-ENV PHP_ASC_URL="https://downloads.php.net/~daniels/php-8.5.0alpha1.tar.xz.asc"
-ENV PHP_SHA256="f21c207b350de8555b9630a7ac7d0893c553186f1b5027236728b29cc99fe4b4"
+ENV PHP_VERSION="8.3.23"
+ENV PHP_URL="https://www.php.net/distributions/php-8.3.23.tar.xz"
+ENV PHP_ASC_URL="https://www.php.net/distributions/php-8.3.23.tar.xz.asc"
+ENV PHP_SHA256="08be64700f703bca6ff1284bf1fdaffa37ae1b9734b6559f8350248e8960a6db"
+========
+ENV GPG_KEYS 1198C0117593497A5EC5C199286AF1F9897469DC 49D9AF6BC72A80D6691719C8AA23F5BE9C7097D4 D95C03BC702BE9515344AE3374E44BC9067701A5
+
+ENV PHP_VERSION 8.5.0RC3
+ENV PHP_URL="https://downloads.php.net/~daniels/php-8.5.0RC3.tar.xz" PHP_ASC_URL="https://downloads.php.net/~daniels/php-8.5.0RC3.tar.xz.asc"
+ENV PHP_SHA256="d3dd9e8b5e458277f86ca79f47b5001cb2c7d6d6742cdd2298790fd58a5ce7d3"
+>>>>>>>> upstream-master:8.5-rc/alpine3.21/fpm/Dockerfile
 
 RUN set -eux; \
 	\
@@ -91,16 +99,14 @@ RUN set -eux; \
 		echo "$PHP_SHA256 *php.tar.xz" | sha256sum -c -; \
 	fi; \
 	\
-	if [ -n "$PHP_ASC_URL" ]; then \
-		curl -fsSL -o php.tar.xz.asc "$PHP_ASC_URL"; \
-		export GNUPGHOME="$(mktemp -d)"; \
-		for key in $GPG_KEYS; do \
-			gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key"; \
-		done; \
-		gpg --batch --verify php.tar.xz.asc php.tar.xz; \
-		gpgconf --kill all; \
-		rm -rf "$GNUPGHOME"; \
-	fi; \
+	curl -fsSL -o php.tar.xz.asc "$PHP_ASC_URL"; \
+	export GNUPGHOME="$(mktemp -d)"; \
+	for key in $GPG_KEYS; do \
+		gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key"; \
+	done; \
+	gpg --batch --verify php.tar.xz.asc php.tar.xz; \
+	gpgconf --kill all; \
+	rm -rf "$GNUPGHOME"; \
 	\
 	apk del --no-network .fetch-deps
 
@@ -180,6 +186,10 @@ RUN set -eux; \
 		--enable-fpm \
 		--with-fpm-user=www-data \
 		--with-fpm-group=www-data \
+		\
+		--enable-zts \
+# https://externals.io/message/118859
+		--disable-zend-signals \
 	; \
 	make -j "$(nproc)"; \
 	find -type f -name '*.a' -delete; \

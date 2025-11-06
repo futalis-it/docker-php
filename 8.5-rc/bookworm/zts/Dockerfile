@@ -17,7 +17,7 @@ RUN set -eux; \
 
 # dependencies required for running "phpize"
 # (see persistent deps below)
-ENV PHPIZE_DEPS="\
+ENV PHPIZE_DEPS \
 		autoconf \
 		dpkg-dev \
 		file \
@@ -26,7 +26,7 @@ ENV PHPIZE_DEPS="\
 		libc-dev \
 		make \
 		pkg-config \
-		re2c"
+		re2c
 
 # persistent / runtime deps
 RUN set -eux; \
@@ -39,8 +39,7 @@ RUN set -eux; \
 	; \
 	rm -rf /var/lib/apt/lists/*
 
-
-ENV PHP_INI_DIR=/usr/local/etc/php
+ENV PHP_INI_DIR /usr/local/etc/php
 RUN set -eux; \
 	mkdir -p "$PHP_INI_DIR/conf.d"; \
 # allow running as an arbitrary user (https://github.com/docker-library/php/issues/743)
@@ -59,12 +58,11 @@ ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
-ENV GPG_KEYS="1198C0117593497A5EC5C199286AF1F9897469DC 49D9AF6BC72A80D6691719C8AA23F5BE9C7097D4 D95C03BC702BE9515344AE3374E44BC9067701A5"
+ENV GPG_KEYS 1198C0117593497A5EC5C199286AF1F9897469DC 49D9AF6BC72A80D6691719C8AA23F5BE9C7097D4 D95C03BC702BE9515344AE3374E44BC9067701A5
 
-ENV PHP_VERSION="8.5.0alpha1"
-ENV PHP_URL="https://downloads.php.net/~daniels/php-8.5.0alpha1.tar.xz"
-ENV PHP_ASC_URL="https://downloads.php.net/~daniels/php-8.5.0alpha1.tar.xz.asc"
-ENV PHP_SHA256="f21c207b350de8555b9630a7ac7d0893c553186f1b5027236728b29cc99fe4b4"
+ENV PHP_VERSION 8.5.0RC3
+ENV PHP_URL="https://downloads.php.net/~daniels/php-8.5.0RC3.tar.xz" PHP_ASC_URL="https://downloads.php.net/~daniels/php-8.5.0RC3.tar.xz.asc"
+ENV PHP_SHA256="d3dd9e8b5e458277f86ca79f47b5001cb2c7d6d6742cdd2298790fd58a5ce7d3"
 
 RUN set -eux; \
 	\
@@ -82,16 +80,14 @@ RUN set -eux; \
 		echo "$PHP_SHA256 *php.tar.xz" | sha256sum -c -; \
 	fi; \
 	\
-	if [ -n "$PHP_ASC_URL" ]; then \
-		curl -fsSL -o php.tar.xz.asc "$PHP_ASC_URL"; \
-		export GNUPGHOME="$(mktemp -d)"; \
-		for key in $GPG_KEYS; do \
-			gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key"; \
-		done; \
-		gpg --batch --verify php.tar.xz.asc php.tar.xz; \
-		gpgconf --kill all; \
-		rm -rf "$GNUPGHOME"; \
-	fi; \
+	curl -fsSL -o php.tar.xz.asc "$PHP_ASC_URL"; \
+	export GNUPGHOME="$(mktemp -d)"; \
+	for key in $GPG_KEYS; do \
+		gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key"; \
+	done; \
+	gpg --batch --verify php.tar.xz.asc php.tar.xz; \
+	gpgconf --kill all; \
+	rm -rf "$GNUPGHOME"; \
 	\
 	apt-mark auto '.*' > /dev/null; \
 	apt-mark manual $savedAptMark > /dev/null; \
@@ -120,7 +116,7 @@ RUN set -eux; \
 		CPPFLAGS="$PHP_CPPFLAGS" \
 		LDFLAGS="$PHP_LDFLAGS" \
 # https://github.com/php/php-src/blob/d6299206dd828382753453befd1b915491b741c6/configure.ac#L1496-L1511
-		PHP_BUILD_PROVIDER='https://github.com/futalis-it/docker-php' \
+		PHP_BUILD_PROVIDER='https://github.com/docker-library/php' \
 		PHP_UNAME='Linux - Docker' \
 	; \
 	docker-php-source extract; \
@@ -204,8 +200,9 @@ RUN set -eux; \
 	find /usr/local -type f -executable -exec ldd '{}' ';' \
 		| awk '/=>/ { so = $(NF-1); if (index(so, "/usr/local/") == 1) { next }; gsub("^/(usr/)?", "", so); printf "*%s\n", so }' \
 		| sort -u \
-		| xargs -r dpkg-query --search \
-		| cut -d: -f1 \
+		| xargs -rt dpkg-query --search \
+# https://manpages.debian.org/trixie/dpkg/dpkg-query.1.en.html#S (we ignore diversions and it'll be really unusual for more than one package to provide any given .so file)
+		| awk 'sub(":$", "", $1) { print $1 }' \
 		| sort -u \
 		| xargs -r apt-mark manual \
 	; \
@@ -220,9 +217,6 @@ RUN set -eux; \
 	php --version
 
 COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
-
-# enable OPcache by default (https://wiki.php.net/rfc/make_opcache_required)
-RUN docker-php-ext-enable opcache
 
 # sodium was built as a shared module (so that it can be replaced later if so desired), so let's enable it too (https://github.com/docker-library/php/issues/598)
 RUN docker-php-ext-enable sodium

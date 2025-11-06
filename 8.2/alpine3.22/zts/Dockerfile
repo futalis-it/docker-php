@@ -4,6 +4,7 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
+<<<<<<<< HEAD:8.5-rc/alpine3.22/zts/Dockerfile
 FROM alpine:3.22 AS curl-builder
 
 RUN apk upgrade \
@@ -23,6 +24,9 @@ COPY curl/* /root/
 RUN abuild -Fr
 
 FROM europe-west10-docker.pkg.dev/futalis-1544014797945/images/httpd:2.4-alpine3.22
+========
+FROM alpine:3.22
+>>>>>>>> upstream-master:8.2/alpine3.22/zts/Dockerfile
 
 # dependencies required for running "phpize"
 # these get automatically installed and removed by "docker-php-ext-*" (unless they're already installed)
@@ -71,12 +75,20 @@ ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
-ENV GPG_KEYS="39B641343D8C104B2B146DC3F9C39DC0B9698544 E60913E4DF209907D8E30D96659A97C9CF2A795A 1198C0117593497A5EC5C199286AF1F9897469DC"
+<<<<<<<< HEAD:8.5-rc/alpine3.22/zts/Dockerfile
+ENV GPG_KEYS="1198C0117593497A5EC5C199286AF1F9897469DC 49D9AF6BC72A80D6691719C8AA23F5BE9C7097D4 D95C03BC702BE9515344AE3374E44BC9067701A5"
 
-ENV PHP_VERSION="8.2.29"
-ENV PHP_URL="https://www.php.net/distributions/php-8.2.29.tar.xz"
-ENV PHP_ASC_URL="https://www.php.net/distributions/php-8.2.29.tar.xz.asc"
+ENV PHP_VERSION="8.5.0alpha1"
+ENV PHP_URL="https://downloads.php.net/~daniels/php-8.5.0alpha1.tar.xz"
+ENV PHP_ASC_URL="https://downloads.php.net/~daniels/php-8.5.0alpha1.tar.xz.asc"
+ENV PHP_SHA256="f21c207b350de8555b9630a7ac7d0893c553186f1b5027236728b29cc99fe4b4"
+========
+ENV GPG_KEYS 39B641343D8C104B2B146DC3F9C39DC0B9698544 E60913E4DF209907D8E30D96659A97C9CF2A795A 1198C0117593497A5EC5C199286AF1F9897469DC
+
+ENV PHP_VERSION 8.2.29
+ENV PHP_URL="https://www.php.net/distributions/php-8.2.29.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-8.2.29.tar.xz.asc"
 ENV PHP_SHA256="475f991afd2d5b901fb410be407d929bc00c46285d3f439a02c59e8b6fe3589c"
+>>>>>>>> upstream-master:8.2/alpine3.22/zts/Dockerfile
 
 RUN set -eux; \
 	\
@@ -91,16 +103,14 @@ RUN set -eux; \
 		echo "$PHP_SHA256 *php.tar.xz" | sha256sum -c -; \
 	fi; \
 	\
-	if [ -n "$PHP_ASC_URL" ]; then \
-		curl -fsSL -o php.tar.xz.asc "$PHP_ASC_URL"; \
-		export GNUPGHOME="$(mktemp -d)"; \
-		for key in $GPG_KEYS; do \
-			gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key"; \
-		done; \
-		gpg --batch --verify php.tar.xz.asc php.tar.xz; \
-		gpgconf --kill all; \
-		rm -rf "$GNUPGHOME"; \
-	fi; \
+	curl -fsSL -o php.tar.xz.asc "$PHP_ASC_URL"; \
+	export GNUPGHOME="$(mktemp -d)"; \
+	for key in $GPG_KEYS; do \
+		gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key"; \
+	done; \
+	gpg --batch --verify php.tar.xz.asc php.tar.xz; \
+	gpgconf --kill all; \
+	rm -rf "$GNUPGHOME"; \
 	\
 	apk del --no-network .fetch-deps
 

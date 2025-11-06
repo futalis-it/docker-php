@@ -4,6 +4,7 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
+<<<<<<<< HEAD:8.2/alpine3.22/zts/Dockerfile
 FROM alpine:3.22 AS curl-builder
 
 RUN apk upgrade \
@@ -22,7 +23,10 @@ COPY curl/* /root/
 
 RUN abuild -Fr
 
+FROM europe-west10-docker.pkg.dev/futalis-1544014797945/images/httpd:2.4-alpine3.22
+========
 FROM alpine:3.22
+>>>>>>>> upstream-master:8.4/alpine3.22/cli/Dockerfile
 
 # dependencies required for running "phpize"
 # these get automatically installed and removed by "docker-php-ext-*" (unless they're already installed)
@@ -44,7 +48,7 @@ RUN apk upgrade --no-cache \
 		openssl \
 		tar \
 		xz
-RUN adduser -u 82 -D -S -G www-data www-data
+
 
 
 COPY --from=curl-builder /root/packages/x86_64 /curl-packages
@@ -71,12 +75,20 @@ ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
-ENV GPG_KEYS="AFD8691FDAEDF03BDF6E460563F15A9B715376CA 9D7F99A0CB8F05C8A6958D6256A97AF7600A39A6 0616E93D95AF471243E26761770426E17EBBB3DD"
+<<<<<<<< HEAD:8.2/alpine3.22/zts/Dockerfile
+ENV GPG_KEYS="39B641343D8C104B2B146DC3F9C39DC0B9698544 E60913E4DF209907D8E30D96659A97C9CF2A795A 1198C0117593497A5EC5C199286AF1F9897469DC"
 
-ENV PHP_VERSION="8.4.10"
-ENV PHP_URL="https://www.php.net/distributions/php-8.4.10.tar.xz"
-ENV PHP_ASC_URL="https://www.php.net/distributions/php-8.4.10.tar.xz.asc"
-ENV PHP_SHA256="14983a9ef8800e6bc2d920739fd386054402f7976ca9cd7f711509496f0d2632"
+ENV PHP_VERSION="8.2.29"
+ENV PHP_URL="https://www.php.net/distributions/php-8.2.29.tar.xz"
+ENV PHP_ASC_URL="https://www.php.net/distributions/php-8.2.29.tar.xz.asc"
+ENV PHP_SHA256="475f991afd2d5b901fb410be407d929bc00c46285d3f439a02c59e8b6fe3589c"
+========
+ENV GPG_KEYS AFD8691FDAEDF03BDF6E460563F15A9B715376CA 9D7F99A0CB8F05C8A6958D6256A97AF7600A39A6 0616E93D95AF471243E26761770426E17EBBB3DD
+
+ENV PHP_VERSION 8.4.14
+ENV PHP_URL="https://www.php.net/distributions/php-8.4.14.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-8.4.14.tar.xz.asc"
+ENV PHP_SHA256="bac90ee7cf738e814c89b6b27d4d2c4b70e50942a420837e1a22f5fd5f9867a3"
+>>>>>>>> upstream-master:8.4/alpine3.22/cli/Dockerfile
 
 RUN set -eux; \
 	\
@@ -91,16 +103,14 @@ RUN set -eux; \
 		echo "$PHP_SHA256 *php.tar.xz" | sha256sum -c -; \
 	fi; \
 	\
-	if [ -n "$PHP_ASC_URL" ]; then \
-		curl -fsSL -o php.tar.xz.asc "$PHP_ASC_URL"; \
-		export GNUPGHOME="$(mktemp -d)"; \
-		for key in $GPG_KEYS; do \
-			gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key"; \
-		done; \
-		gpg --batch --verify php.tar.xz.asc php.tar.xz; \
-		gpgconf --kill all; \
-		rm -rf "$GNUPGHOME"; \
-	fi; \
+	curl -fsSL -o php.tar.xz.asc "$PHP_ASC_URL"; \
+	export GNUPGHOME="$(mktemp -d)"; \
+	for key in $GPG_KEYS; do \
+		gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key"; \
+	done; \
+	gpg --batch --verify php.tar.xz.asc php.tar.xz; \
+	gpgconf --kill all; \
+	rm -rf "$GNUPGHOME"; \
 	\
 	apk del --no-network .fetch-deps
 
@@ -118,6 +128,8 @@ RUN set -eux; \
 		linux-headers \
 		oniguruma-dev \
 		openssl-dev \
+		patch \
+		patchutils \
 		readline-dev \
 		sqlite-dev \
 	; \
@@ -135,6 +147,12 @@ RUN set -eux; \
 	; \
 	docker-php-source extract; \
 	cd /usr/src/php; \
+	# https://github.com/php/php-src/issues/18743 "Incompatibility in Inline TLS Assembly on Alpine 3.22 with zend_jit_ir.c"
+	# https://github.com/docker-library/php/pull/1580
+	curl -fL 'https://github.com/php/php-src/commit/b3c8afe272a6919248986c703c2e1defc73ff707.patch?full_index=1' -o 18743.patch; \
+	echo 'b334f73434c9732a4b27a42eb5d417e10df842e854c02a3e753b2479f8978bf5 *18743.patch' | sha256sum -c -; \
+	filterdiff -x '*/NEWS' 18743.patch | patch -p1; \
+	rm 18743.patch; \
 	gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)"; \
 	./configure \
 		--build="$gnuArch" \

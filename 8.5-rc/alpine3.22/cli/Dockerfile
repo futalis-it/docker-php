@@ -4,11 +4,34 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
-FROM alpine:3.22 AS curl-builder
+<<<<<<<< HEAD:8.0/alpine3.20/cli/Dockerfile
+FROM alpine:3.20 AS openssl1-builder
 
 RUN apk upgrade \
     && apk add alpine-sdk
 
+RUN mkdir -p /var/cache/distfiles \
+    && chmod a+w /var/cache/distfiles
+
+WORKDIR /root
+
+RUN abuild-keygen -an \
+    && cp /root/.abuild/-*.rsa.pub /etc/apk/keys/
+
+COPY openssl1.1-compat/ /root/
+
+RUN abuild -F checksum \
+    && abuild -Fr
+
+FROM alpine:3.20 AS curl-builder
+
+RUN apk upgrade \
+    && apk add alpine-sdk
+
+COPY --from=openssl1-builder /root/packages/x86_64 /openssl1-packages
+COPY --from=openssl1-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
+RUN apk add /openssl1-packages/*.apk
+#RUN ln -s /usr/bin/openssl1.1 /usr/bin/openssl
 
 RUN mkdir -p /var/cache/distfiles \
     && chmod a+w /var/cache/distfiles
@@ -22,7 +45,10 @@ COPY curl/* /root/
 
 RUN abuild -Fr
 
+FROM alpine:3.20
+========
 FROM alpine:3.22
+>>>>>>>> upstream-master:8.5-rc/alpine3.22/cli/Dockerfile
 
 # dependencies required for running "phpize"
 # these get automatically installed and removed by "docker-php-ext-*" (unless they're already installed)
@@ -41,12 +67,17 @@ ENV PHPIZE_DEPS="\
 RUN apk upgrade --no-cache \
     && apk add --no-cache \
 		ca-certificates \
-		openssl \
+		 \
 		tar \
 		xz
 RUN adduser -u 82 -D -S -G www-data www-data
 
 
+COPY --from=openssl1-builder /root/packages/x86_64 /openssl1-packages
+COPY --from=openssl1-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
+RUN apk add --allow-untrusted /openssl1-packages/*.apk
+RUN rm -fr /openssl1-packages
+RUN ln -s /usr/bin/openssl1.1 /usr/bin/openssl
 COPY --from=curl-builder /root/packages/x86_64 /curl-packages
 COPY --from=curl-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
 RUN apk add /curl-packages/*.apk
@@ -71,12 +102,20 @@ ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
-ENV GPG_KEYS="1198C0117593497A5EC5C199286AF1F9897469DC 49D9AF6BC72A80D6691719C8AA23F5BE9C7097D4 D95C03BC702BE9515344AE3374E44BC9067701A5"
+<<<<<<<< HEAD:8.0/alpine3.20/cli/Dockerfile
+ENV GPG_KEYS="1729F83938DA44E27BA0F4D3DBDB397470D12172 BFDDD28642824F8118EF77909B67A5C12229118F 2C16C765DBE54A088130F1BC4B9B5F600B55F3B4 39B641343D8C104B2B146DC3F9C39DC0B9698544"
 
-ENV PHP_VERSION="8.5.0alpha1"
-ENV PHP_URL="https://downloads.php.net/~daniels/php-8.5.0alpha1.tar.xz"
-ENV PHP_ASC_URL="https://downloads.php.net/~daniels/php-8.5.0alpha1.tar.xz.asc"
-ENV PHP_SHA256="f21c207b350de8555b9630a7ac7d0893c553186f1b5027236728b29cc99fe4b4"
+ENV PHP_VERSION="8.0.30"
+ENV PHP_URL="https://www.php.net/distributions/php-8.0.30.tar.xz"
+ENV PHP_ASC_URL="https://www.php.net/distributions/php-8.0.30.tar.xz.asc"
+ENV PHP_SHA256="216ab305737a5d392107112d618a755dc5df42058226f1670e9db90e77d777d9"
+========
+ENV GPG_KEYS 1198C0117593497A5EC5C199286AF1F9897469DC 49D9AF6BC72A80D6691719C8AA23F5BE9C7097D4 D95C03BC702BE9515344AE3374E44BC9067701A5
+
+ENV PHP_VERSION 8.5.0RC3
+ENV PHP_URL="https://downloads.php.net/~daniels/php-8.5.0RC3.tar.xz" PHP_ASC_URL="https://downloads.php.net/~daniels/php-8.5.0RC3.tar.xz.asc"
+ENV PHP_SHA256="d3dd9e8b5e458277f86ca79f47b5001cb2c7d6d6742cdd2298790fd58a5ce7d3"
+>>>>>>>> upstream-master:8.5-rc/alpine3.22/cli/Dockerfile
 
 RUN set -eux; \
 	\
@@ -91,16 +130,14 @@ RUN set -eux; \
 		echo "$PHP_SHA256 *php.tar.xz" | sha256sum -c -; \
 	fi; \
 	\
-	if [ -n "$PHP_ASC_URL" ]; then \
-		curl -fsSL -o php.tar.xz.asc "$PHP_ASC_URL"; \
-		export GNUPGHOME="$(mktemp -d)"; \
-		for key in $GPG_KEYS; do \
-			gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key"; \
-		done; \
-		gpg --batch --verify php.tar.xz.asc php.tar.xz; \
-		gpgconf --kill all; \
-		rm -rf "$GNUPGHOME"; \
-	fi; \
+	curl -fsSL -o php.tar.xz.asc "$PHP_ASC_URL"; \
+	export GNUPGHOME="$(mktemp -d)"; \
+	for key in $GPG_KEYS; do \
+		gpg --batch --keyserver keyserver.ubuntu.com --recv-keys "$key"; \
+	done; \
+	gpg --batch --verify php.tar.xz.asc php.tar.xz; \
+	gpgconf --kill all; \
+	rm -rf "$GNUPGHOME"; \
 	\
 	apk del --no-network .fetch-deps
 
@@ -115,9 +152,10 @@ RUN set -eux; \
 		gnu-libiconv-dev \
 		libsodium-dev \
 		libxml2-dev \
+		libzip-dev \
 		linux-headers \
 		oniguruma-dev \
-		openssl-dev \
+		openssl1.1-compat-dev \
 		readline-dev \
 		sqlite-dev \
 	; \
@@ -150,6 +188,8 @@ RUN set -eux; \
 # https://github.com/docker-library/php/issues/822
 		--with-pic \
 		\
+# --enable-ftp is included here for compatibility with existing versions. ftp_ssl_connect() needed ftp to be compiled statically before PHP 7.0 (see https://github.com/docker-library/php/issues/236).
+		--enable-ftp \
 # --enable-mbstring is included here because otherwise there's no way to get pecl to use it properly (see https://github.com/docker-library/php/issues/195)
 		--enable-mbstring \
 # --enable-mysqlnd is included here because it's harder to compile after the fact than extensions are (since it's a plugin for several extensions, not an extension in itself)
@@ -166,6 +206,7 @@ RUN set -eux; \
 		--with-iconv=/usr \
 		--with-openssl \
 		--with-readline \
+        --with-zip \
 		--with-zlib \
 		\
 # https://github.com/docker-library/php/pull/1259
@@ -212,7 +253,6 @@ RUN set -eux; \
 # smoke test
 	php --version
 
-COPY --from=ghcr.io/php/pie:bin /pie /usr/bin/pie
 COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 
 # enable OPcache by default (https://wiki.php.net/rfc/make_opcache_required)

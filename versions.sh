@@ -67,24 +67,23 @@ for version in "${versions[@]}"; do
 	ascUrl="${possi[2]}"
 	sha256="${possi[3]}"
 
-	if ! wget -q --spider "$url"; then
+	if ! curl --head -fsSL "$url" -o /dev/null; then
 		echo >&2 "error: '$url' appears to be missing"
 		exit 1
 	fi
 
-	# if we don't have a .asc URL, let's see if we can figure one out :)
-	if [ -z "$ascUrl" ] && wget -q --spider "$url.asc"; then
+	# if we don't have a .asc URL, let's just assume one :)
+	if [ -z "$ascUrl" ]; then
 		ascUrl="$url.asc"
 	fi
 
 	variants='[]'
 	# order here controls the order of the library/ file
 	for suite in \
+		trixie \
 		bookworm \
-		bullseye \
 		alpine3.22 \
 		alpine3.21 \
-		alpine3.20 \
 	; do
 		# 8.0 doesn't support OpenSSL 3, which is the only version in bookworm
 		# only keep two variants of Debian per version of php
