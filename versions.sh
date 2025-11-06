@@ -7,7 +7,7 @@ cd "$(dirname "$(readlink -f "$BASH_SOURCE")")"
 
 versions=( "$@" )
 if [ ${#versions[@]} -eq 0 ]; then
-	versions=( 8*/ )
+	versions=( */ )
 	json='{}'
 else
 	json="$(< versions.json)"
@@ -84,15 +84,11 @@ for version in "${versions[@]}"; do
 		bookworm \
 		alpine3.22 \
 		alpine3.21 \
+		alpine3.20 \
 	; do
-		# 8.0 doesn't support OpenSSL 3, which is the only version in bookworm
-		# only keep two variants of Debian per version of php
-		if [ "$rcVersion" = '8.0' ] && [ "$suite" = 'bookworm' ]; then
+		if [ "$rcVersion" = '8.0' ] && [ "$suite" != 'alpine3.20' ]; then
 			continue
 		fi
-        if [ "$rcVersion" = '8.0' ] && ([ "$suite" = 'alpine3.22' ] || [ "$suite" = 'alpine3.21' ]); then
-            continue
-        fi
         if [ "$rcVersion" != '8.0' ] && [ "$suite" = 'alpine3.20' ]; then
             continue
         fi

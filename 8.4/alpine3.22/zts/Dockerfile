@@ -4,34 +4,11 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
-<<<<<<<< HEAD:8.0/alpine3.20/zts/Dockerfile
-FROM alpine:3.20 AS openssl1-builder
+FROM alpine:3.22 AS curl-builder
 
 RUN apk upgrade \
     && apk add alpine-sdk
 
-RUN mkdir -p /var/cache/distfiles \
-    && chmod a+w /var/cache/distfiles
-
-WORKDIR /root
-
-RUN abuild-keygen -an \
-    && cp /root/.abuild/-*.rsa.pub /etc/apk/keys/
-
-COPY openssl1.1-compat/ /root/
-
-RUN abuild -F checksum \
-    && abuild -Fr
-
-FROM alpine:3.20 AS curl-builder
-
-RUN apk upgrade \
-    && apk add alpine-sdk
-
-COPY --from=openssl1-builder /root/packages/x86_64 /openssl1-packages
-COPY --from=openssl1-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
-RUN apk add /openssl1-packages/*.apk
-#RUN ln -s /usr/bin/openssl1.1 /usr/bin/openssl
 
 RUN mkdir -p /var/cache/distfiles \
     && chmod a+w /var/cache/distfiles
@@ -45,10 +22,7 @@ COPY curl/* /root/
 
 RUN abuild -Fr
 
-FROM europe-west10-docker.pkg.dev/futalis-1544014797945/images/httpd:2.4-alpine3.20
-========
-FROM alpine:3.22
->>>>>>>> upstream-master:8.4/alpine3.22/zts/Dockerfile
+FROM europe-west10-docker.pkg.dev/futalis-1544014797945/images/httpd:2.4-alpine3.22
 
 # dependencies required for running "phpize"
 # these get automatically installed and removed by "docker-php-ext-*" (unless they're already installed)
@@ -67,17 +41,12 @@ ENV PHPIZE_DEPS="\
 RUN apk upgrade --no-cache \
     && apk add --no-cache \
 		ca-certificates \
-		 \
+		openssl \
 		tar \
 		xz
 
 
 
-COPY --from=openssl1-builder /root/packages/x86_64 /openssl1-packages
-COPY --from=openssl1-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
-RUN apk add --allow-untrusted /openssl1-packages/*.apk
-RUN rm -fr /openssl1-packages
-RUN ln -s /usr/bin/openssl1.1 /usr/bin/openssl
 COPY --from=curl-builder /root/packages/x86_64 /curl-packages
 COPY --from=curl-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
 RUN apk add /curl-packages/*.apk
@@ -102,18 +71,12 @@ ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
-ENV GPG_KEYS="1729F83938DA44E27BA0F4D3DBDB397470D12172 BFDDD28642824F8118EF77909B67A5C12229118F 2C16C765DBE54A088130F1BC4B9B5F600B55F3B4 39B641343D8C104B2B146DC3F9C39DC0B9698544"
+ENV GPG_KEYS="AFD8691FDAEDF03BDF6E460563F15A9B715376CA 9D7F99A0CB8F05C8A6958D6256A97AF7600A39A6 0616E93D95AF471243E26761770426E17EBBB3DD"
 
-<<<<<<<< HEAD:8.0/alpine3.20/zts/Dockerfile
-ENV PHP_VERSION="8.0.30"
-ENV PHP_URL="https://www.php.net/distributions/php-8.0.30.tar.xz"
-ENV PHP_ASC_URL="https://www.php.net/distributions/php-8.0.30.tar.xz.asc"
-ENV PHP_SHA256="216ab305737a5d392107112d618a755dc5df42058226f1670e9db90e77d777d9"
-========
-ENV PHP_VERSION 8.4.14
-ENV PHP_URL="https://www.php.net/distributions/php-8.4.14.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-8.4.14.tar.xz.asc"
+ENV PHP_VERSION="8.4.14"
+ENV PHP_URL="https://www.php.net/distributions/php-8.4.14.tar.xz"
+ENV PHP_ASC_URL="https://www.php.net/distributions/php-8.4.14.tar.xz.asc"
 ENV PHP_SHA256="bac90ee7cf738e814c89b6b27d4d2c4b70e50942a420837e1a22f5fd5f9867a3"
->>>>>>>> upstream-master:8.4/alpine3.22/zts/Dockerfile
 
 RUN set -eux; \
 	\
@@ -150,10 +113,9 @@ RUN set -eux; \
 		gnu-libiconv-dev \
 		libsodium-dev \
 		libxml2-dev \
-		libzip-dev \
 		linux-headers \
 		oniguruma-dev \
-		openssl1.1-compat-dev \
+		openssl-dev \
 		readline-dev \
 		sqlite-dev \
 	; \
@@ -186,8 +148,6 @@ RUN set -eux; \
 # https://github.com/docker-library/php/issues/822
 		--with-pic \
 		\
-# --enable-ftp is included here for compatibility with existing versions. ftp_ssl_connect() needed ftp to be compiled statically before PHP 7.0 (see https://github.com/docker-library/php/issues/236).
-		--enable-ftp \
 # --enable-mbstring is included here because otherwise there's no way to get pecl to use it properly (see https://github.com/docker-library/php/issues/195)
 		--enable-mbstring \
 # --enable-mysqlnd is included here because it's harder to compile after the fact than extensions are (since it's a plugin for several extensions, not an extension in itself)
@@ -204,7 +164,6 @@ RUN set -eux; \
 		--with-iconv=/usr \
 		--with-openssl \
 		--with-readline \
-        --with-zip \
 		--with-zlib \
 		\
 # https://github.com/docker-library/php/pull/1259
@@ -258,6 +217,7 @@ RUN set -eux; \
 # smoke test
 	php --version
 
+COPY --from=ghcr.io/php/pie:bin /pie /usr/bin/pie
 COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 
 # enable OPcache by default (https://wiki.php.net/rfc/make_opcache_required)

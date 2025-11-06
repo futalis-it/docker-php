@@ -59,18 +59,12 @@ ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
-ENV GPG_KEYS="1198C0117593497A5EC5C199286AF1F9897469DC 49D9AF6BC72A80D6691719C8AA23F5BE9C7097D4 D95C03BC702BE9515344AE3374E44BC9067701A5"
+ENV GPG_KEYS="AFD8691FDAEDF03BDF6E460563F15A9B715376CA 9D7F99A0CB8F05C8A6958D6256A97AF7600A39A6 0616E93D95AF471243E26761770426E17EBBB3DD"
 
-<<<<<<<< HEAD:8.5-rc/bullseye/zts/Dockerfile
-ENV PHP_VERSION="8.5.0alpha1"
-ENV PHP_URL="https://downloads.php.net/~daniels/php-8.5.0alpha1.tar.xz"
-ENV PHP_ASC_URL="https://downloads.php.net/~daniels/php-8.5.0alpha1.tar.xz.asc"
-ENV PHP_SHA256="f21c207b350de8555b9630a7ac7d0893c553186f1b5027236728b29cc99fe4b4"
-========
-ENV PHP_VERSION 8.4.14
-ENV PHP_URL="https://www.php.net/distributions/php-8.4.14.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-8.4.14.tar.xz.asc"
+ENV PHP_VERSION="8.4.14"
+ENV PHP_URL="https://www.php.net/distributions/php-8.4.14.tar.xz"
+ENV PHP_ASC_URL="https://www.php.net/distributions/php-8.4.14.tar.xz.asc"
 ENV PHP_SHA256="bac90ee7cf738e814c89b6b27d4d2c4b70e50942a420837e1a22f5fd5f9867a3"
->>>>>>>> upstream-master:8.4/trixie/zts/Dockerfile
 
 RUN set -eux; \
 	\

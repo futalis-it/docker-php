@@ -4,8 +4,7 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
-<<<<<<<< HEAD:8.5-rc/alpine3.21/cli/Dockerfile
-FROM alpine:3.21 AS curl-builder
+FROM alpine:3.22 AS curl-builder
 
 RUN apk upgrade \
     && apk add alpine-sdk
@@ -23,10 +22,7 @@ COPY curl/* /root/
 
 RUN abuild -Fr
 
-FROM alpine:3.21
-========
 FROM alpine:3.22
->>>>>>>> upstream-master:8.3/alpine3.22/cli/Dockerfile
 
 # dependencies required for running "phpize"
 # these get automatically installed and removed by "docker-php-ext-*" (unless they're already installed)
@@ -75,18 +71,12 @@ ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
-ENV GPG_KEYS="1198C0117593497A5EC5C199286AF1F9897469DC 49D9AF6BC72A80D6691719C8AA23F5BE9C7097D4 D95C03BC702BE9515344AE3374E44BC9067701A5"
+ENV GPG_KEYS="1198C0117593497A5EC5C199286AF1F9897469DC C28D937575603EB4ABB725861C0779DC5C0A9DE4 AFD8691FDAEDF03BDF6E460563F15A9B715376CA"
 
-<<<<<<<< HEAD:8.5-rc/alpine3.21/cli/Dockerfile
-ENV PHP_VERSION="8.5.0alpha1"
-ENV PHP_URL="https://downloads.php.net/~daniels/php-8.5.0alpha1.tar.xz"
-ENV PHP_ASC_URL="https://downloads.php.net/~daniels/php-8.5.0alpha1.tar.xz.asc"
-ENV PHP_SHA256="f21c207b350de8555b9630a7ac7d0893c553186f1b5027236728b29cc99fe4b4"
-========
-ENV PHP_VERSION 8.3.27
-ENV PHP_URL="https://www.php.net/distributions/php-8.3.27.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-8.3.27.tar.xz.asc"
+ENV PHP_VERSION="8.3.27"
+ENV PHP_URL="https://www.php.net/distributions/php-8.3.27.tar.xz"
+ENV PHP_ASC_URL="https://www.php.net/distributions/php-8.3.27.tar.xz.asc"
 ENV PHP_SHA256="c15a09a9d199437144ecfef7d712ec4ca5c6820cf34acc24cc8489dd0cee41ba"
->>>>>>>> upstream-master:8.3/alpine3.22/cli/Dockerfile
 
 RUN set -eux; \
 	\

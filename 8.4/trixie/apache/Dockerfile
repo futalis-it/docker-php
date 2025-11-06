@@ -119,18 +119,12 @@ ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
-ENV GPG_KEYS="1729F83938DA44E27BA0F4D3DBDB397470D12172 BFDDD28642824F8118EF77909B67A5C12229118F 2C16C765DBE54A088130F1BC4B9B5F600B55F3B4 39B641343D8C104B2B146DC3F9C39DC0B9698544"
+ENV GPG_KEYS="AFD8691FDAEDF03BDF6E460563F15A9B715376CA 9D7F99A0CB8F05C8A6958D6256A97AF7600A39A6 0616E93D95AF471243E26761770426E17EBBB3DD"
 
-<<<<<<<< HEAD:8.0/bullseye/apache/Dockerfile
-ENV PHP_VERSION="8.0.30"
-ENV PHP_URL="https://www.php.net/distributions/php-8.0.30.tar.xz"
-ENV PHP_ASC_URL="https://www.php.net/distributions/php-8.0.30.tar.xz.asc"
-ENV PHP_SHA256="216ab305737a5d392107112d618a755dc5df42058226f1670e9db90e77d777d9"
-========
-ENV PHP_VERSION 8.4.14
-ENV PHP_URL="https://www.php.net/distributions/php-8.4.14.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-8.4.14.tar.xz.asc"
+ENV PHP_VERSION="8.4.14"
+ENV PHP_URL="https://www.php.net/distributions/php-8.4.14.tar.xz"
+ENV PHP_ASC_URL="https://www.php.net/distributions/php-8.4.14.tar.xz.asc"
 ENV PHP_SHA256="bac90ee7cf738e814c89b6b27d4d2c4b70e50942a420837e1a22f5fd5f9867a3"
->>>>>>>> upstream-master:8.4/trixie/apache/Dockerfile
 
 RUN set -eux; \
 	\
@@ -210,8 +204,6 @@ RUN set -eux; \
 # https://github.com/docker-library/php/issues/822
 		--with-pic \
 		\
-# --enable-ftp is included here for compatibility with existing versions. ftp_ssl_connect() needed ftp to be compiled statically before PHP 7.0 (see https://github.com/docker-library/php/issues/236).
-		--enable-ftp \
 # --enable-mbstring is included here because otherwise there's no way to get pecl to use it properly (see https://github.com/docker-library/php/issues/195)
 		--enable-mbstring \
 # --enable-mysqlnd is included here because it's harder to compile after the fact than extensions are (since it's a plugin for several extensions, not an extension in itself)

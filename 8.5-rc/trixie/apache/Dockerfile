@@ -119,20 +119,12 @@ ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
-<<<<<<<< HEAD:8.5-rc/bookworm/apache/Dockerfile
 ENV GPG_KEYS="1198C0117593497A5EC5C199286AF1F9897469DC 49D9AF6BC72A80D6691719C8AA23F5BE9C7097D4 D95C03BC702BE9515344AE3374E44BC9067701A5"
 
-ENV PHP_VERSION="8.5.0alpha1"
-ENV PHP_URL="https://downloads.php.net/~daniels/php-8.5.0alpha1.tar.xz"
-ENV PHP_ASC_URL="https://downloads.php.net/~daniels/php-8.5.0alpha1.tar.xz.asc"
-ENV PHP_SHA256="f21c207b350de8555b9630a7ac7d0893c553186f1b5027236728b29cc99fe4b4"
-========
-ENV GPG_KEYS 1198C0117593497A5EC5C199286AF1F9897469DC 49D9AF6BC72A80D6691719C8AA23F5BE9C7097D4 D95C03BC702BE9515344AE3374E44BC9067701A5
-
-ENV PHP_VERSION 8.5.0RC3
-ENV PHP_URL="https://downloads.php.net/~daniels/php-8.5.0RC3.tar.xz" PHP_ASC_URL="https://downloads.php.net/~daniels/php-8.5.0RC3.tar.xz.asc"
+ENV PHP_VERSION="8.5.0RC3"
+ENV PHP_URL="https://downloads.php.net/~daniels/php-8.5.0RC3.tar.xz"
+ENV PHP_ASC_URL="https://downloads.php.net/~daniels/php-8.5.0RC3.tar.xz.asc"
 ENV PHP_SHA256="d3dd9e8b5e458277f86ca79f47b5001cb2c7d6d6742cdd2298790fd58a5ce7d3"
->>>>>>>> upstream-master:8.5-rc/trixie/apache/Dockerfile
 
 RUN set -eux; \
 	\

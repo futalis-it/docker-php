@@ -4,7 +4,6 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
-<<<<<<<< HEAD:8.3/alpine3.22/fpm-zts/Dockerfile
 FROM alpine:3.22 AS curl-builder
 
 RUN apk upgrade \
@@ -24,9 +23,6 @@ COPY curl/* /root/
 RUN abuild -Fr
 
 FROM europe-west10-docker.pkg.dev/futalis-1544014797945/images/httpd:2.4-alpine3.22
-========
-FROM alpine:3.22
->>>>>>>> upstream-master:8.4/alpine3.22/fpm/Dockerfile
 
 # dependencies required for running "phpize"
 # these get automatically installed and removed by "docker-php-ext-*" (unless they're already installed)
@@ -75,18 +71,12 @@ ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
-ENV GPG_KEYS="1198C0117593497A5EC5C199286AF1F9897469DC C28D937575603EB4ABB725861C0779DC5C0A9DE4 AFD8691FDAEDF03BDF6E460563F15A9B715376CA"
+ENV GPG_KEYS="AFD8691FDAEDF03BDF6E460563F15A9B715376CA 9D7F99A0CB8F05C8A6958D6256A97AF7600A39A6 0616E93D95AF471243E26761770426E17EBBB3DD"
 
-<<<<<<<< HEAD:8.3/alpine3.22/fpm-zts/Dockerfile
-ENV PHP_VERSION="8.3.23"
-ENV PHP_URL="https://www.php.net/distributions/php-8.3.23.tar.xz"
-ENV PHP_ASC_URL="https://www.php.net/distributions/php-8.3.23.tar.xz.asc"
-ENV PHP_SHA256="08be64700f703bca6ff1284bf1fdaffa37ae1b9734b6559f8350248e8960a6db"
-========
-ENV PHP_VERSION 8.4.14
-ENV PHP_URL="https://www.php.net/distributions/php-8.4.14.tar.xz" PHP_ASC_URL="https://www.php.net/distributions/php-8.4.14.tar.xz.asc"
+ENV PHP_VERSION="8.4.14"
+ENV PHP_URL="https://www.php.net/distributions/php-8.4.14.tar.xz"
+ENV PHP_ASC_URL="https://www.php.net/distributions/php-8.4.14.tar.xz.asc"
 ENV PHP_SHA256="bac90ee7cf738e814c89b6b27d4d2c4b70e50942a420837e1a22f5fd5f9867a3"
->>>>>>>> upstream-master:8.4/alpine3.22/fpm/Dockerfile
 
 RUN set -eux; \
 	\
@@ -188,10 +178,6 @@ RUN set -eux; \
 		--enable-fpm \
 		--with-fpm-user=www-data \
 		--with-fpm-group=www-data \
-		\
-		--enable-zts \
-# https://externals.io/message/118859
-		--disable-zend-signals \
 	; \
 	make -j "$(nproc)"; \
 	find -type f -name '*.a' -delete; \
