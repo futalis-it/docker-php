@@ -20,13 +20,17 @@ depends_dev="
 	c-ares-dev
 	libidn2-dev
 	libpsl-dev
+{{ if env.version != "8.0" then ( -}}
 	nghttp2-dev
 	nghttp3-dev
 	openssl-dev>3
+{{ ) else ( -}}
+	openssl1.1-compat-dev
+{{ ) end -}}
 	zlib-dev
 	zstd-dev
 	"
-checkdepends="nghttp2 python3"
+checkdepends="{{ if env.version != "8.0" then "nghttp2 " else "" end }}python3"
 makedepends_host="$depends_dev"
 makedepends_build="groff perl"
 subpackages="$pkgname-dbg $pkgname-static $pkgname-doc $pkgname-dev libcurl"
@@ -228,10 +232,12 @@ build() {
 		--enable-unix-sockets \
 		--enable-static \
 		--with-libidn2 \
+{{ if env.version != "8.0" then ( -}}
 		--with-nghttp2 \
 		--with-nghttp3 \
-		--with-openssl \
 		--with-openssl-quic \
+{{ ) else "" end -}}
+		--with-openssl \
 		--with-ca-bundle=/etc/ssl/certs/ca-certificates.crt \
 		--with-ca-path=/etc/ssl/certs \
 		--with-zsh-functions-dir \
