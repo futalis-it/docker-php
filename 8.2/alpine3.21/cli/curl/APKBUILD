@@ -230,8 +230,8 @@ build() {
 		--with-libidn2 \
 		--with-nghttp2 \
 		--with-nghttp3 \
-		--with-openssl \
 		--with-openssl-quic \
+		--with-openssl \
 		--with-ca-bundle=/etc/ssl/certs/ca-certificates.crt \
 		--with-ca-path=/etc/ssl/certs \
 		--with-zsh-functions-dir \
