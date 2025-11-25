@@ -1,6 +1,6 @@
 FROM alpine:{{ env.alpineVer }} AS curl-builder
 
-RUN apk upgrade --no-cache \
+RUN apk upgrade \
     && apk add --no-cache alpine-sdk
 
 {{ if env.version == "8.0" then ( -}}

@@ -1,6 +1,6 @@
 FROM alpine:{{ env.alpineVer }} AS openssl1-builder
 
-RUN apk upgrade --no-cache \
+RUN apk upgrade \
     && apk add --no-cache alpine-sdk
 
 RUN mkdir -p /var/cache/distfiles \
@@ -15,4 +15,3 @@ COPY openssl1.1-compat/ /root/
 
 RUN abuild -F checksum \
     && abuild -Fr
-
