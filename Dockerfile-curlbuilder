@@ -1,12 +1,12 @@
 FROM alpine:{{ env.alpineVer }} AS curl-builder
 
-RUN apk upgrade \
-    && apk add alpine-sdk
+RUN apk upgrade --no-cache \
+    && apk add --no-cache alpine-sdk
 
 {{ if env.version == "8.0" then ( -}}
 COPY --from=openssl1-builder /root/packages/x86_64 /openssl1-packages
 COPY --from=openssl1-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
-RUN apk add /openssl1-packages/*.apk
+RUN apk add --no-cache /openssl1-packages/*.apk
 #RUN ln -s /usr/bin/openssl1.1 /usr/bin/openssl
 {{ ) else "" end -}}
 

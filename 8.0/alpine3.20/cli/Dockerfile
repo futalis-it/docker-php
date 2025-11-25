@@ -6,8 +6,8 @@
 
 FROM alpine:3.20 AS openssl1-builder
 
-RUN apk upgrade \
-    && apk add alpine-sdk
+RUN apk upgrade --no-cache \
+    && apk add --no-cache alpine-sdk
 
 RUN mkdir -p /var/cache/distfiles \
     && chmod a+w /var/cache/distfiles
@@ -24,12 +24,12 @@ RUN abuild -F checksum \
 
 FROM alpine:3.20 AS curl-builder
 
-RUN apk upgrade \
-    && apk add alpine-sdk
+RUN apk upgrade --no-cache \
+    && apk add --no-cache alpine-sdk
 
 COPY --from=openssl1-builder /root/packages/x86_64 /openssl1-packages
 COPY --from=openssl1-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
-RUN apk add /openssl1-packages/*.apk
+RUN apk add --no-cache /openssl1-packages/*.apk
 #RUN ln -s /usr/bin/openssl1.1 /usr/bin/openssl
 
 RUN mkdir -p /var/cache/distfiles \
@@ -71,12 +71,12 @@ RUN adduser -u 82 -D -S -G www-data www-data
 
 COPY --from=openssl1-builder /root/packages/x86_64 /openssl1-packages
 COPY --from=openssl1-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
-RUN apk add --allow-untrusted /openssl1-packages/*.apk
+RUN apk add --no-cache --allow-untrusted /openssl1-packages/*.apk
 RUN rm -fr /openssl1-packages
 RUN ln -s /usr/bin/openssl1.1 /usr/bin/openssl
 COPY --from=curl-builder /root/packages/x86_64 /curl-packages
 COPY --from=curl-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
-RUN apk add /curl-packages/*.apk
+RUN apk add --no-cache /curl-packages/*.apk
 RUN rm -fr /curl-packages
 
 ENV PHP_INI_DIR=/usr/local/etc/php

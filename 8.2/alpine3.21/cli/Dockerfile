@@ -6,8 +6,8 @@
 
 FROM alpine:3.21 AS curl-builder
 
-RUN apk upgrade \
-    && apk add alpine-sdk
+RUN apk upgrade --no-cache \
+    && apk add --no-cache alpine-sdk
 
 
 RUN mkdir -p /var/cache/distfiles \
@@ -49,7 +49,7 @@ RUN adduser -u 82 -D -S -G www-data www-data
 
 COPY --from=curl-builder /root/packages/x86_64 /curl-packages
 COPY --from=curl-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
-RUN apk add /curl-packages/*.apk
+RUN apk add --no-cache /curl-packages/*.apk
 RUN rm -fr /curl-packages
 
 ENV PHP_INI_DIR=/usr/local/etc/php
