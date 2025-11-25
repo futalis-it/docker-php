@@ -6,7 +6,7 @@
 
 FROM alpine:3.21 AS curl-builder
 
-RUN apk upgrade --no-cache \
+RUN apk upgrade \
     && apk add --no-cache alpine-sdk
 
 

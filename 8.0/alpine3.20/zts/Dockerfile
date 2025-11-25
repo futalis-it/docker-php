@@ -6,7 +6,7 @@
 
 FROM alpine:3.20 AS openssl1-builder
 
-RUN apk upgrade --no-cache \
+RUN apk upgrade \
     && apk add --no-cache alpine-sdk
 
 RUN mkdir -p /var/cache/distfiles \
@@ -21,10 +21,9 @@ COPY openssl1.1-compat/ /root/
 
 RUN abuild -F checksum \
     && abuild -Fr
-
 FROM alpine:3.20 AS curl-builder
 
-RUN apk upgrade --no-cache \
+RUN apk upgrade \
     && apk add --no-cache alpine-sdk
 
 COPY --from=openssl1-builder /root/packages/x86_64 /openssl1-packages
