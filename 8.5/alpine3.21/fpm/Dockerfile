@@ -22,7 +22,7 @@ COPY curl/* /root/
 
 RUN abuild -Fr
 
-FROM europe-west10-docker.pkg.dev/futalis-1544014797945/images/httpd:2.4-alpine3.21
+FROM registry.futalis.com/library/httpd:2.4-alpine3.21
 
 # dependencies required for running "phpize"
 # these get automatically installed and removed by "docker-php-ext-*" (unless they're already installed)
