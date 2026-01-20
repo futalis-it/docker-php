@@ -257,12 +257,15 @@ RUN set -eux; \
 		echo 'catch_workers_output = yes'; \
 		echo 'decorate_workers_output = no'; \
 		echo; \
-		echo '; default listen adddress for easy override in later php-fpm.d/*.conf files'; \
+		echo '; default listen address for easy override in later php-fpm.d/*.conf files'; \
 		echo 'listen = 9000'; \
 	} | tee php-fpm.d/docker.conf; \
 	{ \
 		echo '[global]'; \
 		echo 'daemonize = no'; \
+		echo; \
+		echo '; the [www] ini section below is for backwards compatibility and will be removed in 8.6+'; \
+		echo '[www]'; \
 	} | tee php-fpm.d/zz-docker.conf; \
 	mkdir -p "$PHP_INI_DIR/conf.d"; \
 	{ \
