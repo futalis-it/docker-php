@@ -67,10 +67,10 @@
   },
   "8.3-rc": null,
   "8.4": {
-    "version": "8.4.16",
-    "url": "https://www.php.net/distributions/php-8.4.16.tar.xz",
-    "ascUrl": "https://www.php.net/distributions/php-8.4.16.tar.xz.asc",
-    "sha256": "f66f8f48db34e9e29f7bfd6901178e9cf4a1b163e6e497716dfcb8f88bcfae30",
+    "version": "8.4.18",
+    "url": "https://www.php.net/distributions/php-8.4.18.tar.xz",
+    "ascUrl": "https://www.php.net/distributions/php-8.4.18.tar.xz.asc",
+    "sha256": "957a9b19b4a8e965ee0cc788ca74333bfffaadc206b58611b6cd3cc8b2f40110",
     "variants": [
       "trixie/cli",
       "trixie/apache",
