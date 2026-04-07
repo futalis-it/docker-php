@@ -47,7 +47,7 @@ for version; do
 
 		alpineVer="${suite#alpine}" # "3.12", etc
 		if [ "$suite" != "$alpineVer" ]; then
-			from="registry.futalis.com/library/httpd:2.4-alpine$alpineVer"
+			from="registry.futalis.de/httpd:2.4-alpine$alpineVer"
 			if [ "$variant" == "cli" ]; then
 			    from="alpine:$alpineVer"
 			fi
