@@ -69,9 +69,6 @@ for version; do
 		{
 			generated_warning
 			if [ "$suite" != "$alpineVer" ]; then
-			    if [ "$version" == "8.0" ]; then
-			        gawk -f "$jqt" 'Dockerfile-openssl1.1-builder';
-                fi
 			    gawk -f "$jqt" 'Dockerfile-curlbuilder';
             fi
 			gawk -f "$jqt" 'Dockerfile-linux.template'
@@ -88,9 +85,6 @@ for version; do
 		if [ "$suite" != "$alpineVer" ]; then
 		    cp -ar curl "$version/$dir/"
 		    gawk -f "$jqt" 'curl/APKBUILD' > "$version/$dir/curl/APKBUILD"
-		    if [ "$version" == "8.0" ]; then
-		        cp -ar openssl1.1-compat "$version/$dir/"
-		    fi
 		fi
 
 		cmd="$(jq <<<"$cmd" -r '.[0]')"

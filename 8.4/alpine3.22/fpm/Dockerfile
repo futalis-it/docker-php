@@ -9,7 +9,6 @@ FROM alpine:3.22 AS curl-builder
 RUN apk upgrade \
     && apk add --no-cache alpine-sdk
 
-
 RUN mkdir -p /var/cache/distfiles \
     && chmod a+w /var/cache/distfiles
 

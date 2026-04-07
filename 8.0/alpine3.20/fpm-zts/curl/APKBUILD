@@ -15,11 +15,12 @@ depends_dev="
 	c-ares-dev
 	libidn2-dev
 	libpsl-dev
-	openssl1.1-compat-dev
+	nghttp2-dev
+	libressl-dev
 	zlib-dev
 	zstd-dev
 	"
-checkdepends="python3"
+checkdepends="nghttp2 python3"
 makedepends_host="$depends_dev"
 makedepends_build="groff perl"
 subpackages="$pkgname-dbg $pkgname-static $pkgname-doc $pkgname-dev libcurl"
@@ -233,6 +234,7 @@ build() {
 		--enable-unix-sockets \
 		--enable-static \
 		--with-libidn2 \
+		--with-nghttp2 \
 		--with-openssl \
 		--with-ca-bundle=/etc/ssl/certs/ca-certificates.crt \
 		--with-ca-path=/etc/ssl/certs \

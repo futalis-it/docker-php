@@ -4,32 +4,10 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
-FROM alpine:3.20 AS openssl1-builder
-
-RUN apk upgrade \
-    && apk add --no-cache alpine-sdk
-
-RUN mkdir -p /var/cache/distfiles \
-    && chmod a+w /var/cache/distfiles
-
-WORKDIR /root
-
-RUN abuild-keygen -an \
-    && cp /root/.abuild/-*.rsa.pub /etc/apk/keys/
-
-COPY openssl1.1-compat/ /root/
-
-RUN abuild -F checksum \
-    && abuild -Fr
 FROM alpine:3.20 AS curl-builder
 
 RUN apk upgrade \
     && apk add --no-cache alpine-sdk
-
-COPY --from=openssl1-builder /root/packages/x86_64 /openssl1-packages
-COPY --from=openssl1-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
-RUN apk add --no-cache /openssl1-packages/*.apk
-#RUN ln -s /usr/bin/openssl1.1 /usr/bin/openssl
 
 RUN mkdir -p /var/cache/distfiles \
     && chmod a+w /var/cache/distfiles
@@ -62,17 +40,12 @@ ENV PHPIZE_DEPS="\
 RUN apk upgrade --no-cache \
     && apk add --no-cache \
 		ca-certificates \
-		 \
+		libressl libressl3.8-libcrypto libressl3.8-libssl libressl3.8-libtls \
 		tar \
 		xz
 
 
 
-COPY --from=openssl1-builder /root/packages/x86_64 /openssl1-packages
-COPY --from=openssl1-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
-RUN apk add --no-cache --allow-untrusted /openssl1-packages/*.apk
-RUN rm -fr /openssl1-packages
-RUN ln -s /usr/bin/openssl1.1 /usr/bin/openssl
 COPY --from=curl-builder /root/packages/x86_64 /curl-packages
 COPY --from=curl-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
 RUN apk add --no-cache /curl-packages/*.apk
@@ -137,12 +110,12 @@ RUN set -eux; \
 		coreutils \
 		curl-dev \
 		gnu-libiconv-dev \
+		libressl-dev \
 		libsodium-dev \
 		libxml2-dev \
 		libzip-dev \
 		linux-headers \
 		oniguruma-dev \
-		openssl1.1-compat-dev \
 		readline-dev \
 		sqlite-dev \
 	; \
@@ -239,6 +212,7 @@ RUN set -eux; \
 			| tr ',' '\n' \
 			| sort -u \
 			| awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
+			| grep -vE '^so:lib(crypto|ssl|tls)\.' \
 	)"; \
 	apk add --no-cache $runDeps; \
 	\

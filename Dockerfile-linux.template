@@ -64,7 +64,7 @@ ENV PHPIZE_DEPS="\
 RUN apk upgrade --no-cache \
     && apk add --no-cache \
 		ca-certificates \
-		{{ if env.version == "8.0" then "" else "openssl" end }} \
+		{{ if env.version == "8.0" then "libressl libressl3.8-libcrypto libressl3.8-libssl libressl3.8-libtls" else "openssl" end }} \
 		tar \
 		xz
 {{ if env.variant == "cli" then "RUN adduser -u 82 -D -S -G www-data www-data" else "" end }}
@@ -82,13 +82,6 @@ RUN set -eux; \
 {{ ) end -}}
 
 {{ if is_alpine then ( -}}
-{{ if env.version == "8.0" then ( -}}
-COPY --from=openssl1-builder /root/packages/x86_64 /openssl1-packages
-COPY --from=openssl1-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
-RUN apk add --no-cache --allow-untrusted /openssl1-packages/*.apk
-RUN rm -fr /openssl1-packages
-RUN ln -s /usr/bin/openssl1.1 /usr/bin/openssl
-{{ ) else "" end -}}
 COPY --from=curl-builder /root/packages/x86_64 /curl-packages
 COPY --from=curl-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
 RUN apk add --no-cache /curl-packages/*.apk
@@ -291,7 +284,7 @@ RUN set -eux; \
 			"libsodium-dev",
 			"libxml2-dev",
 			if env.version == "8.0" then "libzip-dev" else empty end,
-			if env.version == "8.0" then "openssl1.1-compat-dev" else "openssl-dev" end,
+			if env.version == "8.0" then "libressl-dev" else "openssl-dev" end,
 			# https://github.com/docker-library/php/pull/1580 (18743)
 			if need_patch_18743 then "patch", "patchutils" else empty end,
 			"readline-dev",
@@ -482,6 +475,7 @@ RUN set -eux; \
 			| tr ',' '\n' \
 			| sort -u \
 			| awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
+{{ if env.version == "8.0" then "\t\t\t| grep -vE '^so:lib(crypto|ssl|tls)\\.' \\\n" else "" end -}}
 	)"; \
 	apk add --no-cache $runDeps; \
 	\
