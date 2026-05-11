@@ -242,11 +242,6 @@ RUN set -eux; \
 	cp -v php-fpm.conf.default php-fpm.conf; \
 	cp -v php-fpm.d/www.conf.default php-fpm.d/www.conf; \
 	\
-	# comment out localhost-only listen address
-	grep -E '^listen = 127.0.0.1:9000' php-fpm.d/www.conf; \
-	sed -ri 's/^(listen = 127.0.0.1:9000)/;\1/' php-fpm.d/www.conf; \
-	grep -E '^;listen = 127.0.0.1:9000' php-fpm.d/www.conf; \
-	\
 	{ \
 		echo '[global]'; \
 		echo 'error_log = /proc/self/fd/2'; \
@@ -262,16 +257,13 @@ RUN set -eux; \
 		echo '; Ensure worker stdout and stderr are sent to the main error log.'; \
 		echo 'catch_workers_output = yes'; \
 		echo 'decorate_workers_output = no'; \
-		echo; \
-		echo '; default listen address for easy override in later php-fpm.d/*.conf files'; \
-		echo 'listen = 9000'; \
 	} | tee php-fpm.d/docker.conf; \
 	{ \
 		echo '[global]'; \
 		echo 'daemonize = no'; \
 		echo; \
-		echo '; the [www] ini section below is for backwards compatibility and will be removed in 8.6+'; \
 		echo '[www]'; \
+		echo 'listen = 9000'; \
 	} | tee php-fpm.d/zz-docker.conf; \
 	mkdir -p "$PHP_INI_DIR/conf.d"; \
 	{ \

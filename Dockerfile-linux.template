@@ -28,6 +28,12 @@
 		env.variant == "zts" # only needed for ZTS builds
 		and is_alpine
 		and IN(rcVersion; "8.2")
+	;
+	def is_legacy_fpm_listen:
+		# last upstream patches before the new php-fpm "listen" layout — plus PHP 8.0
+		# which is retained on this fork and predates all of them
+		(.version | IN("8.2.30", "8.3.29", "8.4.16", "8.5.1"))
+		or rcVersion == "8.0"
 -}}
 FROM {{ env.from }}
 
@@ -534,7 +540,7 @@ RUN set -eux; \
 	\
 	cp -v php-fpm.conf.default php-fpm.conf; \
 	cp -v php-fpm.d/www.conf.default php-fpm.d/www.conf; \
-{{ if .version | IN("8.2.30", "8.3.29", "8.4.16", "8.5.1") then "" else ( -}}
+{{ if is_legacy_fpm_listen then "" else ( -}}
 	\
 	# comment out localhost-only listen address
 	grep -E '^listen = 127.0.0.1:9000' php-fpm.d/www.conf; \
@@ -557,7 +563,7 @@ RUN set -eux; \
 		echo '; Ensure worker stdout and stderr are sent to the main error log.'; \
 		echo 'catch_workers_output = yes'; \
 		echo 'decorate_workers_output = no'; \
-{{ if .version | IN("8.2.30", "8.3.29", "8.4.16", "8.5.1") then "" else ( -}}
+{{ if is_legacy_fpm_listen then "" else ( -}}
 		echo; \
 		echo '; default listen address for easy override in later php-fpm.d/*.conf files'; \
 		echo 'listen = 9000'; \
@@ -566,7 +572,7 @@ RUN set -eux; \
 	{ \
 		echo '[global]'; \
 		echo 'daemonize = no'; \
-{{ if .version | IN("8.2.30", "8.3.29", "8.4.16", "8.5.1") then ( -}}
+{{ if is_legacy_fpm_listen then ( -}}
 		echo; \
 		echo '[www]'; \
 		echo 'listen = 9000'; \
