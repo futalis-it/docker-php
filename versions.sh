@@ -90,11 +90,12 @@ for version in "${versions[@]}"; do
 				variants: [
 					# order here controls the order of the library/ file
 					(
-						"trixie",
-						"bookworm",
-						"alpine3.23",
-						"alpine3.22",
-						empty
+						if env.rcVersion == "8.0" then
+							["alpine3.20"]
+						else
+							["trixie", "bookworm", "alpine3.23", "alpine3.22"]
+						end
+						| .[]
 					) as $suite
 					| (
 						"cli",
