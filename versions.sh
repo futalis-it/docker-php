@@ -77,43 +77,37 @@ for version in "${versions[@]}"; do
 		ascUrl="$url.asc"
 	fi
 
-	variants='[]'
-	# order here controls the order of the library/ file
-	for suite in \
-		trixie \
-		bookworm \
-		alpine3.23 \
-		alpine3.22 \
-		alpine3.20 \
-	; do
-		if [ "$rcVersion" = '8.0' ] && [ "$suite" != 'alpine3.20' ]; then
-			continue
-		fi
-        if [ "$rcVersion" != '8.0' ] && [ "$suite" = 'alpine3.20' ]; then
-            continue
-        fi
-		for variant in cli apache fpm zts fpm-zts; do
-			if [[ "$suite" = alpine* ]]; then
-				if [ "$variant" = 'apache' ]; then
-					continue
-				fi
-			fi
-			export suite variant
-			variants="$(jq <<<"$variants" -c '. + [ env.suite + "/" + env.variant ]')"
-		done
-	done
-
 	echo "$version: $fullVersion"
 
 	export fullVersion url ascUrl sha256
 	json="$(
-		jq <<<"$json" -c --argjson variants "$variants" '
+		jq <<<"$json" -c '
 			.[env.version] = {
 				version: env.fullVersion,
 				url: env.url,
 				ascUrl: env.ascUrl,
 				sha256: env.sha256,
-				variants: $variants,
+				variants: [
+					# order here controls the order of the library/ file
+					(
+						"trixie",
+						"bookworm",
+						"alpine3.23",
+						"alpine3.22",
+						empty
+					) as $suite
+					| (
+						"cli",
+						"apache",
+						"fpm",
+						"zts",
+						"fpm-zts",
+						empty
+					) as $variant
+					| if $suite | startswith("alpine") and $variant == "apache" then empty else
+						"\($suite)/\($variant)"
+					end
+				],
 			}
 		'
 	)"
