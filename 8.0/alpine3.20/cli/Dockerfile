@@ -44,11 +44,16 @@ RUN apk upgrade --no-cache \
 		tar \
 		xz
 RUN adduser -u 82 -D -S -G www-data www-data
+RUN ln -s /usr/bin/libressl-openssl /usr/bin/openssl
 
 
 COPY --from=curl-builder /root/packages/x86_64 /curl-packages
 COPY --from=curl-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
-RUN apk add --no-cache /curl-packages/*.apk
+# only runtime packages plus curl-dev (needed to build PHP's curl extension,
+# removed again after the build); installing all subpackages would leak
+# curl-dev's depends_dev (libressl-dev, ...) into the image and conflict
+# with openssl-dev in child images
+RUN apk add --no-cache /curl-packages/curl-[0-9]*.apk /curl-packages/libcurl-[0-9]*.apk /curl-packages/curl-dev-[0-9]*.apk
 RUN rm -fr /curl-packages
 
 ENV PHP_INI_DIR=/usr/local/etc/php
@@ -208,6 +213,7 @@ RUN set -eux; \
 	apk add --no-cache $runDeps; \
 	\
 	apk del --no-network .build-deps; \
+	apk del --no-network curl-dev; \
 	\
 # update pecl channel definitions https://github.com/docker-library/php/issues/443
 	pecl update-channels; \
