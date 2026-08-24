@@ -43,11 +43,9 @@ RUN apk upgrade --no-cache \
 		libressl libressl3.8-libcrypto libressl3.8-libssl libressl3.8-libtls \
 		tar \
 		xz
-
 RUN ln -s /usr/bin/libressl-openssl /usr/bin/openssl
 # ensure www-data user exists
-RUN set -eux; \
-	adduser -u 82 -D -S -G www-data www-data
+RUN set -eux; adduser -u 82 -D -S -G www-data www-data
 # 82 is the standard uid/gid for "www-data" in Alpine
 # https://git.alpinelinux.org/aports/tree/main/apache2/apache2.pre-install?h=3.14-stable
 # https://git.alpinelinux.org/aports/tree/main/lighttpd/lighttpd.pre-install?h=3.14-stable
