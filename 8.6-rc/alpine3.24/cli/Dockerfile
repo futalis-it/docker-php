@@ -4,11 +4,28 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
+FROM alpine:3.24 AS curl-builder
+
+RUN apk upgrade \
+    && apk add --no-cache alpine-sdk
+
+RUN mkdir -p /var/cache/distfiles \
+    && chmod a+w /var/cache/distfiles
+
+WORKDIR /root
+
+RUN abuild-keygen -an \
+    && cp /root/.abuild/-*.rsa.pub /etc/apk/keys/
+
+COPY curl/* /root/
+
+RUN abuild -Fr
+
 FROM alpine:3.24
 
 # dependencies required for running "phpize"
 # these get automatically installed and removed by "docker-php-ext-*" (unless they're already installed)
-ENV PHPIZE_DEPS \
+ENV PHPIZE_DEPS="\
 		autoconf \
 		dpkg-dev dpkg \
 		file \
@@ -17,25 +34,28 @@ ENV PHPIZE_DEPS \
 		libc-dev \
 		make \
 		pkgconf \
-		re2c
+		re2c"
 
 # persistent / runtime deps
-RUN apk add --no-cache \
+RUN apk upgrade --no-cache \
+    && apk add --no-cache \
 		ca-certificates \
-		curl \
 		openssl \
 		tar \
 		xz
-
 # ensure www-data user exists
-RUN set -eux; \
-	adduser -u 82 -D -S -G www-data www-data
+RUN set -eux; adduser -u 82 -D -S -G www-data www-data
 # 82 is the standard uid/gid for "www-data" in Alpine
 # https://git.alpinelinux.org/aports/tree/main/apache2/apache2.pre-install?h=3.14-stable
 # https://git.alpinelinux.org/aports/tree/main/lighttpd/lighttpd.pre-install?h=3.14-stable
 # https://git.alpinelinux.org/aports/tree/main/nginx/nginx.pre-install?h=3.14-stable
 
-ENV PHP_INI_DIR /usr/local/etc/php
+COPY --from=curl-builder /root/packages/x86_64 /curl-packages
+COPY --from=curl-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
+RUN apk add --no-cache /curl-packages/*.apk
+RUN rm -fr /curl-packages
+
+ENV PHP_INI_DIR=/usr/local/etc/php
 RUN set -eux; \
 	mkdir -p "$PHP_INI_DIR/conf.d"; \
 # allow running as an arbitrary user (https://github.com/docker-library/php/issues/743)
@@ -54,10 +74,11 @@ ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
-ENV GPG_KEYS D95C03BC702BE9515344AE3374E44BC9067701A5 016895DE9A475111D537A6E69134FF30BC5A99B5 5CFF17B64DC1C244F5D0EAC3E43535E2EB19010E
+ENV GPG_KEYS="D95C03BC702BE9515344AE3374E44BC9067701A5 016895DE9A475111D537A6E69134FF30BC5A99B5 5CFF17B64DC1C244F5D0EAC3E43535E2EB19010E"
 
-ENV PHP_VERSION 8.6.0beta1
-ENV PHP_URL="https://downloads.php.net/~svpernova09/php-8.6.0beta1.tar.xz" PHP_ASC_URL="https://downloads.php.net/~svpernova09/php-8.6.0beta1.tar.xz.asc"
+ENV PHP_VERSION="8.6.0beta1"
+ENV PHP_URL="https://downloads.php.net/~svpernova09/php-8.6.0beta1.tar.xz"
+ENV PHP_ASC_URL="https://downloads.php.net/~svpernova09/php-8.6.0beta1.tar.xz.asc"
 ENV PHP_SHA256="e44571d75b368b36a2d6db6878705e5512af5d2a78e31463c49796a94018d282"
 
 RUN set -eux; \
@@ -109,7 +130,7 @@ RUN set -eux; \
 		CPPFLAGS="$PHP_CPPFLAGS" \
 		LDFLAGS="$PHP_LDFLAGS" \
 # https://github.com/php/php-src/blob/d6299206dd828382753453befd1b915491b741c6/configure.ac#L1496-L1511
-		PHP_BUILD_PROVIDER='https://github.com/docker-library/php' \
+		PHP_BUILD_PROVIDER='https://github.com/futalis-it/docker-php' \
 		PHP_UNAME='Linux - Docker' \
 	; \
 	docker-php-source extract; \
@@ -185,6 +206,7 @@ RUN set -eux; \
 # smoke test
 	php --version
 
+COPY --from=ghcr.io/php/pie:bin /pie /usr/bin/pie
 COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 
 # sodium was built as a shared module (so that it can be replaced later if so desired), so let's enable it too (https://github.com/docker-library/php/issues/598)

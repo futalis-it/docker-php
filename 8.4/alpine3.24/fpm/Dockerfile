@@ -4,7 +4,7 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
-FROM alpine:3.22 AS curl-builder
+FROM alpine:3.24 AS curl-builder
 
 RUN apk upgrade \
     && apk add --no-cache alpine-sdk
@@ -21,7 +21,7 @@ COPY curl/* /root/
 
 RUN abuild -Fr
 
-FROM registry.futalis.de/httpd:2.4-alpine3.22
+FROM registry.futalis.de/httpd:2.4-alpine3.24
 
 # dependencies required for running "phpize"
 # these get automatically installed and removed by "docker-php-ext-*" (unless they're already installed)
@@ -43,8 +43,12 @@ RUN apk upgrade --no-cache \
 		openssl \
 		tar \
 		xz
+# ensure www-data user exists
 
-
+# 82 is the standard uid/gid for "www-data" in Alpine
+# https://git.alpinelinux.org/aports/tree/main/apache2/apache2.pre-install?h=3.14-stable
+# https://git.alpinelinux.org/aports/tree/main/lighttpd/lighttpd.pre-install?h=3.14-stable
+# https://git.alpinelinux.org/aports/tree/main/nginx/nginx.pre-install?h=3.14-stable
 
 COPY --from=curl-builder /root/packages/x86_64 /curl-packages
 COPY --from=curl-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
@@ -70,12 +74,12 @@ ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
-ENV GPG_KEYS="39B641343D8C104B2B146DC3F9C39DC0B9698544 E60913E4DF209907D8E30D96659A97C9CF2A795A 1198C0117593497A5EC5C199286AF1F9897469DC"
+ENV GPG_KEYS="AFD8691FDAEDF03BDF6E460563F15A9B715376CA 9D7F99A0CB8F05C8A6958D6256A97AF7600A39A6 0616E93D95AF471243E26761770426E17EBBB3DD"
 
-ENV PHP_VERSION="8.2.31"
-ENV PHP_URL="https://www.php.net/distributions/php-8.2.31.tar.xz"
-ENV PHP_ASC_URL="https://www.php.net/distributions/php-8.2.31.tar.xz.asc"
-ENV PHP_SHA256="95eae411d594fe6f6e5678b76645dc13ae47d3c0a5325c1d969b58dea56ee45a"
+ENV PHP_VERSION="8.4.24"
+ENV PHP_URL="https://www.php.net/distributions/php-8.4.24.tar.xz"
+ENV PHP_ASC_URL="https://www.php.net/distributions/php-8.4.24.tar.xz.asc"
+ENV PHP_SHA256="e127be09a8506f4327c5cfa78a614b00d210714484ec215ce0011b4a03c00731"
 
 RUN set -eux; \
 	\
@@ -173,10 +177,6 @@ RUN set -eux; \
 # in PHP 7.4+, the pecl/pear installers are officially deprecated (requiring an explicit "--with-pear")
 		--with-pear \
 		\
-# bundled pcre does not support JIT on riscv64 until 10.41 (php 8.3+)
-# https://github.com/PCRE2Project/pcre2/commits/pcre2-10.41/src/sljit/sljitNativeRISCV_64.c
-# https://github.com/php/php-src/tree/php-8.3.0/ext/pcre/pcre2lib
-		$(test "$gnuArch" = 'riscv64-linux-musl' && echo '--without-pcre-jit') \
 		\
 		--disable-cgi \
 		\

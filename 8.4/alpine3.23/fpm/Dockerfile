@@ -43,8 +43,12 @@ RUN apk upgrade --no-cache \
 		openssl \
 		tar \
 		xz
+# ensure www-data user exists
 
-
+# 82 is the standard uid/gid for "www-data" in Alpine
+# https://git.alpinelinux.org/aports/tree/main/apache2/apache2.pre-install?h=3.14-stable
+# https://git.alpinelinux.org/aports/tree/main/lighttpd/lighttpd.pre-install?h=3.14-stable
+# https://git.alpinelinux.org/aports/tree/main/nginx/nginx.pre-install?h=3.14-stable
 
 COPY --from=curl-builder /root/packages/x86_64 /curl-packages
 COPY --from=curl-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
@@ -72,10 +76,10 @@ ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
 ENV GPG_KEYS="AFD8691FDAEDF03BDF6E460563F15A9B715376CA 9D7F99A0CB8F05C8A6958D6256A97AF7600A39A6 0616E93D95AF471243E26761770426E17EBBB3DD"
 
-ENV PHP_VERSION="8.4.21"
-ENV PHP_URL="https://www.php.net/distributions/php-8.4.21.tar.xz"
-ENV PHP_ASC_URL="https://www.php.net/distributions/php-8.4.21.tar.xz.asc"
-ENV PHP_SHA256="7cf5d8ab12c3b2016875bcfaec71bef1ef0b07bed6148f2c447577074431f984"
+ENV PHP_VERSION="8.4.24"
+ENV PHP_URL="https://www.php.net/distributions/php-8.4.24.tar.xz"
+ENV PHP_ASC_URL="https://www.php.net/distributions/php-8.4.24.tar.xz.asc"
+ENV PHP_SHA256="e127be09a8506f4327c5cfa78a614b00d210714484ec215ce0011b4a03c00731"
 
 RUN set -eux; \
 	\

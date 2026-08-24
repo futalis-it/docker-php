@@ -77,9 +77,13 @@ RUN apk upgrade --no-cache \
 		{{ if env.version == "8.0" then "libressl libressl3.8-libcrypto libressl3.8-libssl libressl3.8-libtls" else "openssl" end }} \
 		tar \
 		xz
-{{ if env.variant == "cli" then "RUN adduser -u 82 -D -S -G www-data www-data" else "" end }}
 {{ if rcVersion == "8.0" then "RUN ln -s /usr/bin/libressl-openssl /usr/bin/openssl\n" else "" end -}}
-
+# ensure www-data user exists
+{{ if env.variant == "cli" then "RUN set -eux; adduser -u 82 -D -S -G www-data www-data" else "" end }}
+# 82 is the standard uid/gid for "www-data" in Alpine
+# https://git.alpinelinux.org/aports/tree/main/apache2/apache2.pre-install?h=3.14-stable
+# https://git.alpinelinux.org/aports/tree/main/lighttpd/lighttpd.pre-install?h=3.14-stable
+# https://git.alpinelinux.org/aports/tree/main/nginx/nginx.pre-install?h=3.14-stable
 {{ ) else ( -}}
 RUN set -eux; \
 	apt-get update; \

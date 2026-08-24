@@ -4,7 +4,7 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
-FROM alpine:3.22 AS curl-builder
+FROM alpine:3.24 AS curl-builder
 
 RUN apk upgrade \
     && apk add --no-cache alpine-sdk
@@ -21,7 +21,7 @@ COPY curl/* /root/
 
 RUN abuild -Fr
 
-FROM registry.futalis.de/httpd:2.4-alpine3.22
+FROM registry.futalis.de/httpd:2.4-alpine3.24
 
 # dependencies required for running "phpize"
 # these get automatically installed and removed by "docker-php-ext-*" (unless they're already installed)
@@ -43,8 +43,12 @@ RUN apk upgrade --no-cache \
 		openssl \
 		tar \
 		xz
+# ensure www-data user exists
 
-
+# 82 is the standard uid/gid for "www-data" in Alpine
+# https://git.alpinelinux.org/aports/tree/main/apache2/apache2.pre-install?h=3.14-stable
+# https://git.alpinelinux.org/aports/tree/main/lighttpd/lighttpd.pre-install?h=3.14-stable
+# https://git.alpinelinux.org/aports/tree/main/nginx/nginx.pre-install?h=3.14-stable
 
 COPY --from=curl-builder /root/packages/x86_64 /curl-packages
 COPY --from=curl-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
@@ -70,12 +74,12 @@ ENV PHP_CFLAGS="-fstack-protector-strong -fpic -fpie -O2 -D_LARGEFILE_SOURCE -D_
 ENV PHP_CPPFLAGS="$PHP_CFLAGS"
 ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
-ENV GPG_KEYS="1198C0117593497A5EC5C199286AF1F9897469DC 49D9AF6BC72A80D6691719C8AA23F5BE9C7097D4 D95C03BC702BE9515344AE3374E44BC9067701A5"
+ENV GPG_KEYS="AFD8691FDAEDF03BDF6E460563F15A9B715376CA 9D7F99A0CB8F05C8A6958D6256A97AF7600A39A6 0616E93D95AF471243E26761770426E17EBBB3DD"
 
-ENV PHP_VERSION="8.5.6"
-ENV PHP_URL="https://www.php.net/distributions/php-8.5.6.tar.xz"
-ENV PHP_ASC_URL="https://www.php.net/distributions/php-8.5.6.tar.xz.asc"
-ENV PHP_SHA256="826c600b7c6f956bd335558ca3bdbcab23b22126c1cc8d9348be2280a2204bb7"
+ENV PHP_VERSION="8.4.25RC1"
+ENV PHP_URL="https://downloads.php.net/~calvinb/php-8.4.25RC1.tar.xz"
+ENV PHP_ASC_URL="https://downloads.php.net/~calvinb/php-8.4.25RC1.tar.xz.asc"
+ENV PHP_SHA256="666d849f376b20f21dad94c14a0c5faa1649e3c77de50330b05d7967ee5b2441"
 
 RUN set -eux; \
 	\
@@ -220,6 +224,9 @@ RUN set -eux; \
 
 COPY --from=ghcr.io/php/pie:bin /pie /usr/bin/pie
 COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
+
+# enable OPcache by default (https://wiki.php.net/rfc/make_opcache_required)
+RUN docker-php-ext-enable opcache
 
 # sodium was built as a shared module (so that it can be replaced later if so desired), so let's enable it too (https://github.com/docker-library/php/issues/598)
 RUN docker-php-ext-enable sodium
