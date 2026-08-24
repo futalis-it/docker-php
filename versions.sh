@@ -93,7 +93,7 @@ for version in "${versions[@]}"; do
 						if env.rcVersion == "8.0" then
 							["alpine3.20"]
 						else
-							["trixie", "bookworm", "alpine3.23", "alpine3.22"]
+							["trixie", "bookworm", "alpine3.24", "alpine3.23"]
 						end
 						| .[]
 					) as $suite
