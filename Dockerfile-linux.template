@@ -34,6 +34,10 @@
 		# which is retained on this fork and predates all of them
 		(.version | IN("8.2.30", "8.3.29", "8.4.16", "8.5.1"))
 		or rcVersion == "8.0"
+	;
+	def install_pear_pecl:
+		# https://github.com/docker-library/php/issues/1554
+		IN(rcVersion; "8.0", "8.2", "8.3", "8.4", "8.5")
 -}}
 FROM {{ env.from }}
 
@@ -74,7 +78,7 @@ RUN apk upgrade --no-cache \
 		tar \
 		xz
 {{ if env.variant == "cli" then "RUN adduser -u 82 -D -S -G www-data www-data" else "" end }}
-{{ if env.version == "8.0" then "RUN ln -s /usr/bin/libressl-openssl /usr/bin/openssl\n" else "" end -}}
+{{ if rcVersion == "8.0" then "RUN ln -s /usr/bin/libressl-openssl /usr/bin/openssl\n" else "" end -}}
 
 {{ ) else ( -}}
 RUN set -eux; \
@@ -189,6 +193,14 @@ ENV GPG_KEYS="{{
 		# https://www.php.net/gpg-keys.php
 		# https://www.php.net/downloads.php
 
+		"8.6": [
+			# https://wiki.php.net/todo/php86#release_managers
+			# https://www.php.net/gpg-keys.php#gpg-8.6
+			"D95C 03BC 702B E951 5344  AE33 74E4 4BC9 0677 01A5", # daniels
+			"0168 95DE 9A47 5111 D537  A6E6 9134 FF30 BC5A 99B5", # mbeccati
+			"5CFF 17B6 4DC1 C244 F5D0  EAC3 E435 35E2 EB19 010E"  # svpernova09
+		],
+
 		"8.5": [
 			# https://wiki.php.net/todo/php85#release_managers
 			# https://www.php.net/gpg-keys.php#gpg-8.5
@@ -298,8 +310,8 @@ RUN set -eux; \
 			"gnu-libiconv-dev", # https://www.php.net/manual/en/intro.iconv.php "it'd be a good idea to install the GNU libiconv library"
 			"libsodium-dev",
 			"libxml2-dev",
-			if env.version == "8.0" then "libzip-dev" else empty end,
-			if env.version == "8.0" then "libressl-dev" else "openssl-dev" end,
+			if rcVersion == "8.0" then "libzip-dev" else empty end,
+			if rcVersion == "8.0" then "libressl-dev" else "openssl-dev" end,
 			# https://github.com/docker-library/php/pull/1580 (18743)
 			if need_patch_18743 then "patch", "patchutils" else empty end,
 			"readline-dev",
@@ -307,7 +319,7 @@ RUN set -eux; \
 			# https://github.com/docker-library/php/issues/888
 			"linux-headers",
 			# oniguruma is part of mbstring in php 7.4+
-			"oniguruma-dev"
+			if install_pear_pecl then "oniguruma-dev" else empty end
 		else
 			# debian packages
 			if env.variant == "apache" then "apache2-dev" else empty end,
@@ -320,7 +332,7 @@ RUN set -eux; \
 			"libxml2-dev",
 			"zlib1g-dev",
 			# oniguruma is part of mbstring in php 7.4+
-			"libonig-dev"
+			if install_pear_pecl then "libonig-dev" else empty end
 		end ] | sort[] | (
 -}}
 		{{ . }} \
@@ -374,15 +386,24 @@ RUN set -eux; \
 # https://github.com/docker-library/php/issues/439
 		--with-mhash \
 		\
+{{ if rcVersion | IN("8.0", "8.2", "8.3", "8.4", "8.5") then ( -}}
 # https://github.com/docker-library/php/issues/822
 		--with-pic \
 		\
+{{ ) else ( -}}
+# https://github.com/docker-library/php/issues/822
+# https://github.com/php/php-src/pull/21067/changes#diff-4b9db5b77bcd56aa33b310dc44c8bc99c729c9abb195df2e98e6985b81289ae8R130
+		--enable-pic \
+		\
+{{ ) end -}}
 {{ if rcVersion | IN("8.0") then ( -}}
 # --enable-ftp is included here for compatibility with existing versions. ftp_ssl_connect() needed ftp to be compiled statically before PHP 7.0 (see https://github.com/docker-library/php/issues/236).
 		--enable-ftp \
 {{ ) else "" end -}}
+{{ if install_pear_pecl then ( -}}
 # --enable-mbstring is included here because otherwise there's no way to get pecl to use it properly (see https://github.com/docker-library/php/issues/195)
 		--enable-mbstring \
+{{ ) else "" end -}}
 # --enable-mysqlnd is included here because it's harder to compile after the fact than extensions are (since it's a plugin for several extensions, not an extension in itself)
 		--enable-mysqlnd \
 # https://wiki.php.net/rfc/argon2_password_hash
@@ -397,7 +418,7 @@ RUN set -eux; \
 		--with-iconv{{ if is_alpine then "=/usr" else "" end }} \
 		--with-openssl \
 		--with-readline \
-{{ if (is_alpine and env.version == "8.0") then ( -}}
+{{ if (is_alpine and rcVersion == "8.0") then ( -}}
         --with-zip \
 {{ ) else "" end -}}
 		--with-zlib \
@@ -411,10 +432,12 @@ RUN set -eux; \
 		--disable-phpdbg \
 {{ ) end -}}
 		\
+{{ if install_pear_pecl then ( -}}
 # in PHP 7.4+, the pecl/pear installers are officially deprecated (requiring an explicit "--with-pear")
 		--with-pear \
 		\
-{{ if rcVersion | IN("8.2") then ( -}}
+{{ ) else "" end -}}
+{{ if rcVersion == "8.2" then ( -}}
 # bundled pcre does not support JIT on riscv64 until 10.41 (php 8.3+)
 # https://github.com/PCRE2Project/pcre2/commits/pcre2-10.41/src/sljit/sljitNativeRISCV_64.c
 # https://github.com/php/php-src/tree/php-8.3.0/ext/pcre/pcre2lib
@@ -452,7 +475,7 @@ RUN set -eux; \
 		--enable-zts \
 # https://externals.io/message/118859
 		--disable-zend-signals \
-{{ if rcVersion | IN("8.2") then ( -}}
+{{ if rcVersion == "8.2" then ( -}}
 		--enable-zend-max-execution-timers \
 {{ ) else "" end -}}
 {{ ) else "" end -}}
@@ -513,10 +536,12 @@ RUN set -eux; \
 	{{ clean_apt }}; \
 {{ ) end -}}
 	\
+{{ if install_pear_pecl then ( -}}
 # update pecl channel definitions https://github.com/docker-library/php/issues/443
 	pecl update-channels; \
 	rm -rf /tmp/pear ~/.pearrc; \
 	\
+{{ ) else "" end -}}
 # smoke test
 	php --version
 
@@ -586,7 +611,7 @@ RUN set -eux; \
 		echo; \
 		echo '[www]'; \
 		echo 'listen = 9000'; \
-{{ ) elif rcVersion | IN("8.0", "8.2", "8.3", "8.4", "8.5") then ( -}}
+{{ ) elif rcVersion | IN("8.2", "8.3", "8.4", "8.5") then ( -}}
 		echo; \
 		echo '; the [www] ini section below is for backwards compatibility and will be removed in 8.6+'; \
 		echo '[www]'; \
