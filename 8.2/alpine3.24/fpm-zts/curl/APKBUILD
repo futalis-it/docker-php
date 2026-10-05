@@ -3,9 +3,9 @@
 # Contributor: Łukasz Jendrysik <scadu@yandex.com>
 maintainer="Achill Gilgenast <achill@achill.org>"
 pkgname=curl
-pkgver=8.19.0
+pkgver=8.22.0
 pkgrel=0
-pkgdesc="URL retrival utility and library"
+pkgdesc="URL retrieval utility and library"
 url="https://curl.se/"
 arch="all"
 license="curl"
@@ -36,6 +36,45 @@ provides="wcurl=$pkgver-r$pkgrel"
 replaces="wcurl"
 
 # secfixes:
+#   8.22.0-r0:
+#     - CVE-2026-13608
+#     - CVE-2026-18924
+#     - CVE-2026-19931
+#     - CVE-2026-80229
+#     - CVE-2026-80230
+#     - CVE-2026-80231
+#     - CVE-2026-80255
+#     - CVE-2026-80256
+#     - CVE-2026-82208
+#     - CVE-2026-82209
+#   8.21.0-r0:
+#     - CVE-2026-10536
+#     - CVE-2026-11352
+#     - CVE-2026-11564
+#     - CVE-2026-11586
+#     - CVE-2026-11856
+#     - CVE-2026-12064
+#     - CVE-2026-8286
+#     - CVE-2026-8458
+#     - CVE-2026-8924
+#     - CVE-2026-8925
+#     - CVE-2026-8926
+#     - CVE-2026-8927
+#     - CVE-2026-8932
+#     - CVE-2026-9079
+#     - CVE-2026-9080
+#     - CVE-2026-9545
+#     - CVE-2026-9546
+#     - CVE-2026-9547
+#   8.20.0-r0:
+#     - CVE-2026-4873
+#     - CVE-2026-5545
+#     - CVE-2026-5773
+#     - CVE-2026-6253
+#     - CVE-2026-6276
+#     - CVE-2026-6429
+#     - CVE-2026-7009
+#     - CVE-2026-7168
 #   8.19.0-r0:
 #     - CVE-2026-1965
 #     - CVE-2026-3783
@@ -284,5 +323,5 @@ dev() {
 }
 
 sha512sums="
-ee97faaf588b255428000599293c47a2f648af11d1a0b7b823db6aec151e2090f5c7b921745ddb2c3818d92b16e0a4c15d7a9b3d1ff45df1f35438504bd16574  curl-8.19.0.tar.xz
+d6badf794e7a72760a353db73adb8b671804ce41619b401265b22dc8f6770ebeaa5adb3c4d1312722082c56013612a382884e025cca49397a8ab47577dd659f7  curl-8.22.0.tar.xz
 "
