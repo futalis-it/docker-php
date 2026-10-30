@@ -21,7 +21,7 @@ COPY curl/* /root/
 
 RUN abuild -Fr
 
-FROM registry.futalis.de/httpd:2.4-alpine3.23
+FROM registry.futalis.de/futalis/httpd:2.4-alpine3.23
 
 # dependencies required for running "phpize"
 # these get automatically installed and removed by "docker-php-ext-*" (unless they're already installed)
@@ -76,10 +76,10 @@ ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
 ENV GPG_KEYS="1198C0117593497A5EC5C199286AF1F9897469DC 49D9AF6BC72A80D6691719C8AA23F5BE9C7097D4 D95C03BC702BE9515344AE3374E44BC9067701A5"
 
-ENV PHP_VERSION="8.5.9"
-ENV PHP_URL="https://www.php.net/distributions/php-8.5.9.tar.xz"
-ENV PHP_ASC_URL="https://www.php.net/distributions/php-8.5.9.tar.xz.asc"
-ENV PHP_SHA256="0db7855f25bcd0ab1d592cdb35e284d6f6a5d2ae0f6f621122e364cc39b708f4"
+ENV PHP_VERSION="8.5.12"
+ENV PHP_URL="https://www.php.net/distributions/php-8.5.12.tar.xz"
+ENV PHP_ASC_URL="https://www.php.net/distributions/php-8.5.12.tar.xz.asc"
+ENV PHP_SHA256="08bc2eba2a588654ade1357174aa646b761556c862dda0678345ee29ed481209"
 
 RUN set -eux; \
 	\
