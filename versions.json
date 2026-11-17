@@ -1,17 +1,8 @@
 {
-  "8.0": {
-    "version": "8.0.30",
-    "url": "https://www.php.net/distributions/php-8.0.30.tar.xz",
-    "ascUrl": "https://www.php.net/distributions/php-8.0.30.tar.xz.asc",
-    "sha256": "216ab305737a5d392107112d618a755dc5df42058226f1670e9db90e77d777d9",
-    "variants": [
-      "alpine3.20/cli",
-      "alpine3.20/fpm",
-      "alpine3.20/zts",
-      "alpine3.20/fpm-zts"
-    ]
-  },
+  "8.0": null,
   "8.0-rc": null,
+  "8.1": null,
+  "8.1-rc": null,
   "8.2": {
     "version": "8.2.35",
     "url": "https://www.php.net/distributions/php-8.2.35.tar.xz",
@@ -92,32 +83,7 @@
       "alpine3.23/fpm-zts"
     ]
   },
-  "8.4-rc": {
-    "version": "8.4.25RC1",
-    "url": "https://downloads.php.net/~calvinb/php-8.4.25RC1.tar.xz",
-    "ascUrl": "https://downloads.php.net/~calvinb/php-8.4.25RC1.tar.xz.asc",
-    "sha256": "666d849f376b20f21dad94c14a0c5faa1649e3c77de50330b05d7967ee5b2441",
-    "variants": [
-      "trixie/cli",
-      "trixie/apache",
-      "trixie/fpm",
-      "trixie/zts",
-      "trixie/fpm-zts",
-      "bookworm/cli",
-      "bookworm/apache",
-      "bookworm/fpm",
-      "bookworm/zts",
-      "bookworm/fpm-zts",
-      "alpine3.24/cli",
-      "alpine3.24/fpm",
-      "alpine3.24/zts",
-      "alpine3.24/fpm-zts",
-      "alpine3.23/cli",
-      "alpine3.23/fpm",
-      "alpine3.23/zts",
-      "alpine3.23/fpm-zts"
-    ]
-  },
+  "8.4-rc": null,
   "8.5": {
     "version": "8.5.12",
     "url": "https://www.php.net/distributions/php-8.5.12.tar.xz",
@@ -144,38 +110,13 @@
       "alpine3.23/fpm-zts"
     ]
   },
-  "8.5-rc": {
-    "version": "8.5.10RC1",
-    "url": "https://downloads.php.net/~daniels/php-8.5.10RC1.tar.xz",
-    "ascUrl": "https://downloads.php.net/~daniels/php-8.5.10RC1.tar.xz.asc",
-    "sha256": "7afb06b0512eadfb3a6f7227aa6cc93530d95f9f97024efa133ec7b05c36cfec",
-    "variants": [
-      "trixie/cli",
-      "trixie/apache",
-      "trixie/fpm",
-      "trixie/zts",
-      "trixie/fpm-zts",
-      "bookworm/cli",
-      "bookworm/apache",
-      "bookworm/fpm",
-      "bookworm/zts",
-      "bookworm/fpm-zts",
-      "alpine3.24/cli",
-      "alpine3.24/fpm",
-      "alpine3.24/zts",
-      "alpine3.24/fpm-zts",
-      "alpine3.23/cli",
-      "alpine3.23/fpm",
-      "alpine3.23/zts",
-      "alpine3.23/fpm-zts"
-    ]
-  },
+  "8.5-rc": null,
   "8.6": null,
   "8.6-rc": {
-    "version": "8.6.0RC4",
-    "url": "https://downloads.php.net/~mbeccati/php-8.6.0RC4.tar.xz",
-    "ascUrl": "https://downloads.php.net/~mbeccati/php-8.6.0RC4.tar.xz.asc",
-    "sha256": "93f208da9ae059bf6863b0e1d101e6c6475a7b0f0acbf6c084950ab522f514d8",
+    "version": "8.6.0RC7",
+    "url": "https://downloads.php.net/~svpernova09/php-8.6.0RC7.tar.xz",
+    "ascUrl": "https://downloads.php.net/~svpernova09/php-8.6.0RC7.tar.xz.asc",
+    "sha256": "63dba3b693d2f2689f12d5264d212d7b813acfd56fb375c620d04e1eef4bb00a",
     "variants": [
       "trixie/cli",
       "trixie/apache",

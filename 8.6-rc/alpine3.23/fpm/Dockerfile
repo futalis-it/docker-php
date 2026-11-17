@@ -4,23 +4,6 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
-FROM alpine:3.23 AS curl-builder
-
-RUN apk upgrade \
-    && apk add --no-cache alpine-sdk
-
-RUN mkdir -p /var/cache/distfiles \
-    && chmod a+w /var/cache/distfiles
-
-WORKDIR /root
-
-RUN abuild-keygen -an \
-    && cp /root/.abuild/-*.rsa.pub /etc/apk/keys/
-
-COPY curl/* /root/
-
-RUN abuild -Fr
-
 FROM registry.futalis.de/futalis/httpd:2.4-alpine3.23
 
 # dependencies required for running "phpize"
@@ -40,20 +23,17 @@ ENV PHPIZE_DEPS="\
 RUN apk upgrade --no-cache \
     && apk add --no-cache \
 		ca-certificates \
+		curl \
 		openssl \
 		tar \
 		xz
+
 # ensure www-data user exists
 
 # 82 is the standard uid/gid for "www-data" in Alpine
 # https://git.alpinelinux.org/aports/tree/main/apache2/apache2.pre-install?h=3.14-stable
 # https://git.alpinelinux.org/aports/tree/main/lighttpd/lighttpd.pre-install?h=3.14-stable
 # https://git.alpinelinux.org/aports/tree/main/nginx/nginx.pre-install?h=3.14-stable
-
-COPY --from=curl-builder /root/packages/x86_64 /curl-packages
-COPY --from=curl-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
-RUN apk add --no-cache /curl-packages/*.apk
-RUN rm -fr /curl-packages
 
 ENV PHP_INI_DIR=/usr/local/etc/php
 RUN set -eux; \
@@ -76,10 +56,10 @@ ENV PHP_LDFLAGS="-Wl,-O1 -pie"
 
 ENV GPG_KEYS="D95C03BC702BE9515344AE3374E44BC9067701A5 016895DE9A475111D537A6E69134FF30BC5A99B5 5CFF17B64DC1C244F5D0EAC3E43535E2EB19010E"
 
-ENV PHP_VERSION="8.6.0RC4"
-ENV PHP_URL="https://downloads.php.net/~mbeccati/php-8.6.0RC4.tar.xz"
-ENV PHP_ASC_URL="https://downloads.php.net/~mbeccati/php-8.6.0RC4.tar.xz.asc"
-ENV PHP_SHA256="93f208da9ae059bf6863b0e1d101e6c6475a7b0f0acbf6c084950ab522f514d8"
+ENV PHP_VERSION="8.6.0RC7"
+ENV PHP_URL="https://downloads.php.net/~svpernova09/php-8.6.0RC7.tar.xz"
+ENV PHP_ASC_URL="https://downloads.php.net/~svpernova09/php-8.6.0RC7.tar.xz.asc"
+ENV PHP_SHA256="63dba3b693d2f2689f12d5264d212d7b813acfd56fb375c620d04e1eef4bb00a"
 
 RUN set -eux; \
 	\
@@ -136,6 +116,17 @@ RUN set -eux; \
 	docker-php-source extract; \
 	cd /usr/src/php; \
 	gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)"; \
+	case "$gnuArch" in \
+		'i686-linux-'*) \
+			# php zend jit assumes SSE registers, xmm0-7, are available (and "Pentium4"/SSE2 is a reasonable baseline)
+			# https://github.com/php/php-src/pull/22832
+			# so, allow it and use SSE/SSE2 floating-point unit instead of the legacy stack
+			export \
+				CFLAGS="$CFLAGS -msse2 -mfpmath=sse" \
+				CPPFLAGS="$CPPFLAGS -msse2 -mfpmath=sse" \
+			; \
+			;; \
+	esac; \
 	test "$PHP_INI_DIR" != "${PHP_INI_DIR%/php}"; \
 	./configure \
 		--build="$gnuArch" \
@@ -149,10 +140,7 @@ RUN set -eux; \
 # https://github.com/docker-library/php/issues/439
 		--with-mhash \
 		\
-# https://github.com/docker-library/php/issues/822
-# https://github.com/php/php-src/pull/21067/changes#diff-4b9db5b77bcd56aa33b310dc44c8bc99c729c9abb195df2e98e6985b81289ae8R130
-		--enable-pic \
-		\
+# no --enable-pic; forcing PIC also removes -fpie from executable objects, preventing local-exec TLS: https://github.com/docker-library/php/pull/1692
 # --enable-mysqlnd is included here because it's harder to compile after the fact than extensions are (since it's a plugin for several extensions, not an extension in itself)
 		--enable-mysqlnd \
 # https://wiki.php.net/rfc/argon2_password_hash
@@ -178,6 +166,10 @@ RUN set -eux; \
 		--enable-fpm \
 		--with-fpm-user=www-data \
 		--with-fpm-group=www-data \
+		\
+		--enable-zts \
+# https://externals.io/message/118859
+		--disable-zend-signals \
 	; \
 	make -j "$(nproc)"; \
 	find -type f -name '*.a' -delete; \

@@ -4,23 +4,6 @@
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
 
-FROM alpine:3.24 AS curl-builder
-
-RUN apk upgrade \
-    && apk add --no-cache alpine-sdk
-
-RUN mkdir -p /var/cache/distfiles \
-    && chmod a+w /var/cache/distfiles
-
-WORKDIR /root
-
-RUN abuild-keygen -an \
-    && cp /root/.abuild/-*.rsa.pub /etc/apk/keys/
-
-COPY curl/* /root/
-
-RUN abuild -Fr
-
 FROM registry.futalis.de/futalis/httpd:2.4-alpine3.24
 
 # dependencies required for running "phpize"
@@ -40,20 +23,17 @@ ENV PHPIZE_DEPS="\
 RUN apk upgrade --no-cache \
     && apk add --no-cache \
 		ca-certificates \
+		curl \
 		openssl \
 		tar \
 		xz
+
 # ensure www-data user exists
 
 # 82 is the standard uid/gid for "www-data" in Alpine
 # https://git.alpinelinux.org/aports/tree/main/apache2/apache2.pre-install?h=3.14-stable
 # https://git.alpinelinux.org/aports/tree/main/lighttpd/lighttpd.pre-install?h=3.14-stable
 # https://git.alpinelinux.org/aports/tree/main/nginx/nginx.pre-install?h=3.14-stable
-
-COPY --from=curl-builder /root/packages/x86_64 /curl-packages
-COPY --from=curl-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
-RUN apk add --no-cache /curl-packages/*.apk
-RUN rm -fr /curl-packages
 
 ENV PHP_INI_DIR=/usr/local/etc/php
 RUN set -eux; \
@@ -145,6 +125,17 @@ RUN set -eux; \
 	filterdiff -x '*/NEWS' 18743.patch | patch -p1; \
 	rm 18743.patch; \
 	gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)"; \
+	case "$gnuArch" in \
+		'i686-linux-'*) \
+			# php zend jit assumes SSE registers, xmm0-7, are available (and "Pentium4"/SSE2 is a reasonable baseline)
+			# https://github.com/php/php-src/pull/22832
+			# so, allow it and use SSE/SSE2 floating-point unit instead of the legacy stack
+			export \
+				CFLAGS="$CFLAGS -msse2 -mfpmath=sse" \
+				CPPFLAGS="$CPPFLAGS -msse2 -mfpmath=sse" \
+			; \
+			;; \
+	esac; \
 	test "$PHP_INI_DIR" != "${PHP_INI_DIR%/php}"; \
 	./configure \
 		--build="$gnuArch" \

@@ -25,19 +25,13 @@
 	def need_patch_18743:
 		# https://github.com/docker-library/php/pull/1580
 		# https://github.com/php/php-src/issues/18743 "Incompatibility in Inline TLS Assembly on Alpine 3.22 with zend_jit_ir.c"
-		env.variant == "zts" # only needed for ZTS builds
+		env.variant == "zts"
 		and is_alpine
 		and IN(rcVersion; "8.2")
 	;
-	def is_legacy_fpm_listen:
-		# last upstream patches before the new php-fpm "listen" layout — plus PHP 8.0
-		# which is retained on this fork and predates all of them
-		(.version | IN("8.2.30", "8.3.29", "8.4.16", "8.5.1"))
-		or rcVersion == "8.0"
-	;
 	def install_pear_pecl:
 		# https://github.com/docker-library/php/issues/1554
-		IN(rcVersion; "8.0", "8.2", "8.3", "8.4", "8.5")
+		IN(rcVersion; "8.2", "8.3", "8.4", "8.5")
 -}}
 FROM {{ env.from }}
 
@@ -74,10 +68,11 @@ ENV PHPIZE_DEPS="\
 RUN apk upgrade --no-cache \
     && apk add --no-cache \
 		ca-certificates \
-		{{ if env.version == "8.0" then "libressl libressl3.8-libcrypto libressl3.8-libssl libressl3.8-libtls" else "openssl" end }} \
+		curl \
+		openssl \
 		tar \
 		xz
-{{ if rcVersion == "8.0" then "RUN ln -s /usr/bin/libressl-openssl /usr/bin/openssl\n" else "" end -}}
+
 # ensure www-data user exists
 {{ if env.variant == "cli" then "RUN set -eux; adduser -u 82 -D -S -G www-data www-data" else "" end }}
 # 82 is the standard uid/gid for "www-data" in Alpine
@@ -95,21 +90,6 @@ RUN set -eux; \
 	; \
 	{{ clean_apt }}
 {{ ) end -}}
-
-{{ if is_alpine then ( -}}
-COPY --from=curl-builder /root/packages/x86_64 /curl-packages
-COPY --from=curl-builder /etc/apk/keys/-*.rsa.pub /etc/apk/keys/
-{{ if env.version == "8.0" then ( -}}
-# only runtime packages plus curl-dev (needed to build PHP's curl extension,
-# removed again after the build); installing all subpackages would leak
-# curl-dev's depends_dev (libressl-dev, ...) into the image and conflict
-# with openssl-dev in child images
-RUN apk add --no-cache /curl-packages/curl-[0-9]*.apk /curl-packages/libcurl-[0-9]*.apk /curl-packages/curl-dev-[0-9]*.apk
-{{ ) else ( -}}
-RUN apk add --no-cache /curl-packages/*.apk
-{{ ) end -}}
-RUN rm -fr /curl-packages
-{{ ) else "" end -}}
 
 ENV PHP_INI_DIR=/usr/local/etc/php
 RUN set -eux; \
@@ -236,15 +216,6 @@ ENV GPG_KEYS="{{
 			"E609 13E4 DF20 9907 D8E3  0D96 659A 97C9 CF2A 795A", # sergey
 			"1198 C011 7593 497A 5EC5  C199 286A F1F9 8974 69DC"  # pierrick
 		],
-
-		"8.0": [
-			# https://wiki.php.net/todo/php80#release_managers
-			# https://www.php.net/gpg-keys.php#gpg-8.0
-			"1729 F839 38DA 44E2 7BA0  F4D3 DBDB 3974 70D1 2172", # pollita
-			"BFDD D286 4282 4F81 18EF  7790 9B67 A5C1 2229 118F", # carusogabriel
-			"2C16 C765 DBE5 4A08 8130  F1BC 4B9B 5F60 0B55 F3B4", # carusogabriel
-			"39B6 4134 3D8C 104B 2B14  6DC3 F9C3 9DC0 B969 8544"  # ramsey
-		],
 	}[rcVersion] // error("missing GPG keys for " + rcVersion)
 	| map(gsub(" "; ""))
 	| join(" ")
@@ -314,8 +285,7 @@ RUN set -eux; \
 			"gnu-libiconv-dev", # https://www.php.net/manual/en/intro.iconv.php "it'd be a good idea to install the GNU libiconv library"
 			"libsodium-dev",
 			"libxml2-dev",
-			if rcVersion == "8.0" then "libzip-dev" else empty end,
-			if rcVersion == "8.0" then "libressl-dev" else "openssl-dev" end,
+			"openssl-dev",
 			# https://github.com/docker-library/php/pull/1580 (18743)
 			if need_patch_18743 then "patch", "patchutils" else empty end,
 			"readline-dev",
@@ -377,6 +347,17 @@ RUN set -eux; \
 		ln -sT "/usr/include/$debMultiarch/curl" /usr/local/include/curl; \
 	fi; \
 {{ ) end -}}
+	case "$gnuArch" in \
+		'i686-linux-'*) \
+			# php zend jit assumes SSE registers, xmm0-7, are available (and "Pentium4"/SSE2 is a reasonable baseline)
+			# https://github.com/php/php-src/pull/22832
+			# so, allow it and use SSE/SSE2 floating-point unit instead of the legacy stack
+			export \
+				CFLAGS="$CFLAGS -msse2 -mfpmath=sse" \
+				CPPFLAGS="$CPPFLAGS -msse2 -mfpmath=sse" \
+			; \
+			;; \
+	esac; \
 	test "$PHP_INI_DIR" != "${PHP_INI_DIR%/php}"; \
 	./configure \
 		--build="$gnuArch" \
@@ -390,20 +371,18 @@ RUN set -eux; \
 # https://github.com/docker-library/php/issues/439
 		--with-mhash \
 		\
-{{ if rcVersion | IN("8.0", "8.2", "8.3", "8.4", "8.5") then ( -}}
+{{ if rcVersion | IN("8.2", "8.3", "8.4", "8.5") then ( -}}
 # https://github.com/docker-library/php/issues/822
 		--with-pic \
 		\
-{{ ) else ( -}}
+{{ ) elif env.variant == "apache" then ( -}}
 # https://github.com/docker-library/php/issues/822
 # https://github.com/php/php-src/pull/21067/changes#diff-4b9db5b77bcd56aa33b310dc44c8bc99c729c9abb195df2e98e6985b81289ae8R130
 		--enable-pic \
 		\
+{{ ) else ( -}}
+# no --enable-pic; forcing PIC also removes -fpie from executable objects, preventing local-exec TLS: https://github.com/docker-library/php/pull/1692
 {{ ) end -}}
-{{ if rcVersion | IN("8.0") then ( -}}
-# --enable-ftp is included here for compatibility with existing versions. ftp_ssl_connect() needed ftp to be compiled statically before PHP 7.0 (see https://github.com/docker-library/php/issues/236).
-		--enable-ftp \
-{{ ) else "" end -}}
 {{ if install_pear_pecl then ( -}}
 # --enable-mbstring is included here because otherwise there's no way to get pecl to use it properly (see https://github.com/docker-library/php/issues/195)
 		--enable-mbstring \
@@ -422,9 +401,6 @@ RUN set -eux; \
 		--with-iconv{{ if is_alpine then "=/usr" else "" end }} \
 		--with-openssl \
 		--with-readline \
-{{ if (is_alpine and rcVersion == "8.0") then ( -}}
-        --with-zip \
-{{ ) else "" end -}}
 		--with-zlib \
 		\
 {{ if env.variant | IN("cli", "zts") then ( -}}
@@ -441,7 +417,7 @@ RUN set -eux; \
 		--with-pear \
 		\
 {{ ) else "" end -}}
-{{ if rcVersion == "8.2" then ( -}}
+{{ if rcVersion | IN("8.2") then ( -}}
 # bundled pcre does not support JIT on riscv64 until 10.41 (php 8.3+)
 # https://github.com/PCRE2Project/pcre2/commits/pcre2-10.41/src/sljit/sljitNativeRISCV_64.c
 # https://github.com/php/php-src/tree/php-8.3.0/ext/pcre/pcre2lib
@@ -460,7 +436,7 @@ RUN set -eux; \
 		--disable-cgi \
 {{ ) end -}}
 {{ # zts + alpine special cased for embed (otherwise zts is effectively cli): https://github.com/docker-library/php/pull/1342 -}}
-{{ if (env.variant == "zts") or (env.variant == "cli" and (is_alpine | not)) then ( -}}
+{{ if env.variant == "zts" or (env.variant == "cli" and ((rcVersion | version_id) >= 80600 or (is_alpine | not))) then ( -}}
 		\
 # https://github.com/docker-library/php/pull/939#issuecomment-730501748
 		--enable-embed \
@@ -474,12 +450,12 @@ RUN set -eux; \
 		--with-fpm-user=www-data \
 		--with-fpm-group=www-data \
 {{ ) else "" end -}}
-{{ if env.variant | contains("zts") then ( -}}
+{{ if env.variant | contains("zts") or (rcVersion | version_id) >= 80600 then ( -}}
 		\
 		--enable-zts \
 # https://externals.io/message/118859
 		--disable-zend-signals \
-{{ if rcVersion == "8.2" then ( -}}
+{{ if rcVersion | IN("8.2") then ( -}}
 		--enable-zend-max-execution-timers \
 {{ ) else "" end -}}
 {{ ) else "" end -}}
@@ -517,12 +493,10 @@ RUN set -eux; \
 			| tr ',' '\n' \
 			| sort -u \
 			| awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
-{{ if env.version == "8.0" then "\t\t\t| grep -vE '^so:lib(crypto|ssl|tls)\\.' \\\n" else "" end -}}
 	)"; \
 	apk add --no-cache $runDeps; \
 	\
 	apk del --no-network .build-deps; \
-{{ if env.version == "8.0" then "\tapk del --no-network curl-dev; \\\n" else "" end -}}
 {{ ) else ( -}}
 # reset apt-mark's "manual" list so that "purge --auto-remove" will remove all build dependencies
 	apt-mark auto '.*' > /dev/null; \
@@ -554,7 +528,7 @@ COPY --from=ghcr.io/php/pie:bin /pie /usr/bin/pie
 {{ ) else "" end -}}
 COPY docker-php-ext-* docker-php-entrypoint /usr/local/bin/
 
-{{ if IN(rcVersion; "8.0", "8.2", "8.3", "8.4") then ( -}}
+{{ if IN(rcVersion; "8.2", "8.3", "8.4") then ( -}}
 # enable OPcache by default (https://wiki.php.net/rfc/make_opcache_required)
 RUN docker-php-ext-enable opcache
 
@@ -579,13 +553,11 @@ RUN set -eux; \
 	\
 	cp -v php-fpm.conf.default php-fpm.conf; \
 	cp -v php-fpm.d/www.conf.default php-fpm.d/www.conf; \
-{{ if is_legacy_fpm_listen then "" else ( -}}
 	\
 	# comment out localhost-only listen address
 	grep -E '^listen = 127.0.0.1:9000' php-fpm.d/www.conf; \
 	sed -ri 's/^(listen = 127.0.0.1:9000)/;\1/' php-fpm.d/www.conf; \
 	grep -E '^;listen = 127.0.0.1:9000' php-fpm.d/www.conf; \
-{{ ) end -}}
 	\
 	{ \
 		echo '[global]'; \
@@ -602,20 +574,14 @@ RUN set -eux; \
 		echo '; Ensure worker stdout and stderr are sent to the main error log.'; \
 		echo 'catch_workers_output = yes'; \
 		echo 'decorate_workers_output = no'; \
-{{ if is_legacy_fpm_listen then "" else ( -}}
 		echo; \
 		echo '; default listen address for easy override in later php-fpm.d/*.conf files'; \
 		echo 'listen = 9000'; \
-{{ ) end -}}
 	} | tee php-fpm.d/docker.conf; \
 	{ \
 		echo '[global]'; \
 		echo 'daemonize = no'; \
-{{ if is_legacy_fpm_listen then ( -}}
-		echo; \
-		echo '[www]'; \
-		echo 'listen = 9000'; \
-{{ ) elif rcVersion | IN("8.2", "8.3", "8.4", "8.5") then ( -}}
+{{ if rcVersion | IN("8.2", "8.3", "8.4", "8.5") then ( -}}
 		echo; \
 		echo '; the [www] ini section below is for backwards compatibility and will be removed in 8.6+'; \
 		echo '[www]'; \

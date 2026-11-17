@@ -68,9 +68,6 @@ for version; do
 
 		{
 			generated_warning
-			if [ "$suite" != "$alpineVer" ]; then
-			    gawk -f "$jqt" 'Dockerfile-curlbuilder';
-            fi
 			gawk -f "$jqt" 'Dockerfile-linux.template'
 		} > "$version/$dir/Dockerfile"
 
@@ -81,10 +78,6 @@ for version; do
 			"$version/$dir/"
 		if [ "$variant" = 'apache' ]; then
 			cp -a apache2-foreground "$version/$dir/"
-		fi
-		if [ "$suite" != "$alpineVer" ]; then
-		    cp -ar curl "$version/$dir/"
-		    gawk -f "$jqt" 'curl/APKBUILD' > "$version/$dir/curl/APKBUILD"
 		fi
 
 		cmd="$(jq <<<"$cmd" -r '.[0]')"
